@@ -220,7 +220,7 @@
             <div id="role-screen" class="screen">
                 <h2 class="text-2xl sm:text-3xl font-bold text-center mb-6">당신은 누구입니까?</h2>
                 <p class="text-center text-slate-300 mb-8 break-keep">역할을 선택하면, 해당 역할의 경험과 지식을 얻게 됩니다.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     <!-- Roles will be populated by JS -->
                 </div>
             </div>
@@ -229,7 +229,7 @@
             <div id="knowledge-screen" class="screen">
                 <h2 class="text-2xl sm:text-3xl font-bold text-center mb-2">지식 브리핑</h2>
                 <p id="role-title" class="text-center text-amber-400 font-bold text-lg mb-6"></p>
-                <div id="knowledge-list" class="bg-slate-800 p-4 sm:p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 max-h-[65vh] overflow-y-auto">
+                <div id="knowledge-list" class="bg-slate-800 p-4 sm:p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 max-h-[60vh] sm:max-h-[65vh] overflow-y-auto">
                     <!-- Knowledge items will be injected here by JS -->
                 </div>
                 <div class="text-center mt-8">
@@ -247,7 +247,7 @@
                         내 정보 다시보기 🧠
                     </button>
                 </div>
-                <div id="rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[60vh] space-y-3 max-h-[65vh] overflow-y-auto">
+                <div id="rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[60vh] space-y-3 max-h-[60vh] sm:max-h-[65vh] overflow-y-auto">
                    <!-- Ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
@@ -312,7 +312,7 @@
                          내 정보 다시보기 🧠
                      </button>
                 </div>
-                <div id="group-rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[60vh] space-y-3 max-h-[65vh] overflow-y-auto">
+                <div id="group-rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[60vh] space-y-3 max-h-[60vh] sm:max-h-[65vh] overflow-y-auto">
                     <!-- Group ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
@@ -349,13 +349,13 @@
                         <div class="bg-slate-900/50 p-4 rounded-lg flex flex-col">
                             <h3 class="text-xl font-bold text-center mb-4 text-yellow-300">나의 생존 계획</h3>
                             <div id="individual-score-summary" class="text-center mb-4"></div>
-                            <div id="individual-final-list" class="space-y-2 flex-grow overflow-y-auto bg-slate-800 p-3 rounded-md max-h-[50vh] lg:max-h-[45vh]"></div>
+                            <div id="individual-final-list" class="space-y-2 flex-grow overflow-y-auto bg-slate-800 p-3 rounded-md max-h-[45vh] lg:max-h-[50vh]"></div>
                         </div>
                         <!-- Group Report -->
                          <div class="bg-slate-900/50 p-4 rounded-lg flex flex-col">
                             <h3 class="text-xl font-bold text-center mb-4 text-teal-300">우리 모둠의 생존 계획</h3>
                             <div id="group-score-summary" class="text-center mb-4"></div>
-                            <div id="group-final-list" class="space-y-2 flex-grow overflow-y-auto bg-slate-800 p-3 rounded-md max-h-[50vh] lg:max-h-[45vh]"></div>
+                            <div id="group-final-list" class="space-y-2 flex-grow overflow-y-auto bg-slate-800 p-3 rounded-md max-h-[45vh] lg:max-h-[50vh]"></div>
                         </div>
                     </div>
                 </div>
@@ -1079,12 +1079,10 @@
             roleContainer.innerHTML = Object.keys(appData.roles).map(key => {
                 const role = appData.roles[key];
                 return `
-                    <div data-role="${key}" class="role-card bg-slate-800 rounded-lg text-center cursor-pointer hover:bg-slate-700 hover:scale-105 transition-all overflow-hidden">
-                        <img src="${role.imageUrl}" alt="${role.name}" class="w-full aspect-square object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x400/1e293b/94a3b8?text=Image+Error';">
-                        <div class="p-4">
-                           <h3 class="text-xl sm:text-2xl font-bold">${role.name}</h3>
-                           <p class="text-slate-400 text-sm sm:text-base break-keep mt-1">${role.description}</p>
-                        </div>
+                    <div data-role="${key}" class="role-card bg-slate-800 p-3 sm:p-4 rounded-lg text-center cursor-pointer hover:bg-slate-700 hover:scale-105 transition-all overflow-hidden">
+                        <div class="text-4xl sm:text-5xl mb-3">${{influencer:'📸', trainer:'💪', angler:'🎣', diy:'🛠️'}[key]}</div>
+                        <h3 class="text-lg sm:text-xl font-bold">${role.name}</h3>
+                        <p class="text-slate-400 text-sm break-keep mt-1">${role.description}</p>
                     </div>
                 `;
             }).join('');
