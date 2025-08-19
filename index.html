@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>바다에서 길을 잃다: 생존 시뮬레이션 (모둠 활동용)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!--
+        Copyright (c) 2025 [Pinky]
+        This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+        You should have received a copy of the license along with this work. If not, see <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
+    -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+        html, body {
+            overscroll-behavior-y: contain;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: #030712;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #e6f1ff;
+            background-image: linear-gradient(to top, rgba(3, 7, 18, 0.9), rgba(3, 7, 18, 1)), url('https://www.transparenttextures.com/patterns/wavecut.png');
+        }
+        #app-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+        #app-container {
+             background-color: rgba(15, 23, 42, 0.85); /* slate-900 with opacity */
+        }
+        .screen { display: none; }
+        .active-screen { display: block; }
+        .drag-handle {
+            cursor: grab;
+            padding: 0.5rem;
+            color: #94a3b8;
+        }
+        .drag-handle:hover {
+            color: #e2e8f0;
+        }
+        .sortable-ghost {
+            background: #334155;
+            opacity: 0.5;
+        }
+        .modal-base {
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0s 0.2s;
+        }
+        .modal-base.show {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.2s ease;
+        }
+        .modal-content {
+            position: relative;
+            margin: auto;
+            padding: 2rem;
+            width: 95%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.2s ease;
+        }
+        .modal-base.show .modal-content {
+            transform: scale(1);
+        }
+        #emergency-screen {
+            background-color: #000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            z-index: 200;
+        }
+        #emergency-message-container p {
+            opacity: 0;
+            animation: fadeIn 1.5s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .rank-slot.empty {
+            cursor: pointer;
+            border-style: dashed;
+        }
+        .rank-slot.empty:hover {
+            background-color: #1e293b; /* slate-800 */
+        }
+    </style>
+</head>
+<body class="p-2 sm:p-4">
+
+    <!-- Fullscreen Button -->
+    <button id="fullscreen-btn" class="fixed top-4 right-4 z-50 p-2 bg-slate-700/50 hover:bg-slate-600/70 rounded-full text-white transition">
+        <svg id="fs-enter-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5L9 15m0 0H4.5m4.5 0V19.5"/><path d="M19.5 4.5L15 9m0 0h4.5M15 9V4.5"/><path d="M19.5 19.5L15 15m0 0h4.5m-4.5 0V19.5"/><path d="M4.5 4.5L9 9m0 0H4.5M9 9V4.5"/></svg>
+        <svg id="fs-exit-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="M9 15l-6 6m6-6v4.5m0-4.5H4.5"/><path d="M15 9l6-6m-6 6V4.5m0 4.5h4.5"/><path d="M15 15l6 6m-6-6v4.5m0-4.5h4.5"/><path d="M9 9l-6-6m6 6V4.5m0-4.5H4.5"/></svg>
+    </button>
+
+    <div id="app-wrapper">
+        <div id="app-container" class="w-full max-w-7xl mx-auto backdrop-blur-sm rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8">
+
+            <!-- Screen 0: Welcome Screen -->
+            <div id="welcome-screen" class="screen active-screen text-center">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">바다에서 길을 잃다</h1>
+                <p class="text-lg sm:text-xl text-slate-300 mb-8 max-w-3xl mx-auto break-keep">
+                    바다에서 살아남기 위한 모둠 협동 학습에 오신 것을 환영합니다.
+                </p>
+
+                <div class="max-w-3xl mx-auto text-left bg-slate-800/50 p-6 rounded-lg mb-8 space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-cyan-300 mb-3">수업 목표</h2>
+                        <p class="break-keep text-slate-300">
+                            주어진 정보(전문 지식)를 바탕으로 합리적인 의사 결정을 내리는 과정을 체험하고, 모둠원과의 토의를 통해 최선의 결과를 도출하는 협업 능력을 기릅니다.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-cyan-300 mb-3">수업 활동 안내</h2>
+                        <div class="space-y-3 text-slate-300">
+                            <p class="break-keep"><b>[활동 1] 개인별 의견 마련:</b> 모둠과 이름을 입력하고 전문 분야를 선택합니다. 각자 얻은 전문 지식을 바탕으로 생존에 필요한 물품 순위를 정합니다.</p>
+                            <p class="break-keep"><b>[활동 2] 모둠별 의견 조율:</b> 모둠원들과 각자의 순위와 근거를 공유하며 토의합니다. 토의를 통해 우리 모둠의 최종 순위를 결정합니다.</p>
+                            <p class="break-keep"><b>[결과 확인]</b> 개인 순위와 모둠 순위를 해안경비대 전문가의 답과 비교하며, 더 나은 의사결정 과정을 되돌아봅니다.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-yellow-300 mb-2">꼭 읽어주세요!</h3>
+                        <p class="text-slate-400 break-keep">모둠원은 각자 다른 전문 분야를 선택해야 협동의 효과가 커집니다. 자신의 의견만 고집하기보다, 다른 모둠원의 전문 지식을 존중하고 경청하며 합리적인 결정을 내려보세요.</p>
+                    </div>
+                </div>
+
+                <button id="start-class-btn" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                    수업 시작하기
+                </button>
+
+                <div class="mt-8 border-t border-slate-700 pt-6">
+                     <p class="text-slate-400 mb-2">※ 이 활동은 모둠 수업용입니다.</p>
+                    <a href="https://gw1.kr/바다에서살아남기" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 underline">
+                         개인 활동 버전으로 체험하기
+                    </a>
+                </div>
+            </div>
+
+            <!-- Screen 1: Setup Screen -->
+            <div id="setup-screen" class="screen text-center">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">승선자 정보 입력</h1>
+                 <p class="text-base sm:text-lg md:text-xl text-slate-300 mb-8 max-w-3xl mx-auto break-keep">
+                     당신의 소속과 정보를 입력해주세요.
+                 </p>
+                <div class="max-w-sm mx-auto mb-8 space-y-4">
+                    <div>
+                        <label for="groupNameInput" class="block mb-2 text-sm font-medium text-slate-300">소속을 입력하세요</label>
+                        <input type="text" id="groupNameInput" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5" placeholder="예) 1모둠, 푸른중학교" required>
+                    </div>
+                    <div>
+                        <label for="studentNumberInput" class="block mb-2 text-sm font-medium text-slate-300">번호를 선택하세요</label>
+                        <select id="studentNumberInput" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5" required>
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="studentNameInput" class="block mb-2 text-sm font-medium text-slate-300">이름을 입력하세요</label>
+                        <input type="text" id="studentNameInput" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5" placeholder="예) 김선장" required>
+                    </div>
+                </div>
+                <button id="start-mission-btn" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                    항해 시작
+                </button>
+            </div>
+            
+            <!-- Screen 1.8: Activity Guide -->
+            <div id="activity-guide-screen" class="screen text-center">
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-8">활동 안내</h2>
+                <div class="max-w-3xl mx-auto text-left bg-slate-800/50 p-6 sm:p-8 rounded-2xl mb-10 space-y-8">
+                    <div>
+                        <h3 class="font-bold text-cyan-300 text-2xl mb-3">💯 점수 계산 방법</h3>
+                        <p class="text-slate-300 break-keep leading-relaxed">
+                            최종 점수는 해안경비대 전문가가 정한 순위와 여러분이 정한 순위의 차이를 모두 합산하여 계산됩니다.<br>
+                            (예: 전문가 1위, 내 순위 3위 → 2점 / 전문가 8위, 내 순위 2위 → 6점) (총 점수: 2+6 = 8점)<br>
+                            <span class="font-bold text-yellow-300">점수가 낮을수록 생존 확률이 높습니다!</span>
+                        </p>
+                    </div>
+                    <hr class="border-slate-700">
+                    <div>
+                        <h3 class="font-bold text-cyan-300 text-2xl mb-3">✍️ 이유 작성 안내</h3>
+                        <p class="text-slate-300 break-keep leading-relaxed">
+                            각 물품의 순위를 정한 '이유'를 작성하는 것은 여러분의 논리적인 사고 과정을 보여주는 중요한 부분입니다.<br>
+                            이 활동은 수업의 일환으로 진행되므로, <b class="text-yellow-300">자신이 왜 그렇게 생각했는지 이유를 반드시 작성해주세요.</b><br>
+                            <span class="font-bold text-slate-100">작성한 이유는 나중에 모둠원들을 설득하는 데 아주 중요한 근거가 됩니다.</span>
+                        </p>
+                    </div>
+                </div>
+                <button id="go-to-role-selection-btn" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                    역할 선택하기
+                </button>
+            </div>
+
+            <!-- Screen 2: Role Selection -->
+            <div id="role-screen" class="screen">
+                <h2 class="text-2xl sm:text-3xl font-bold text-center mb-6">당신은 누구입니까?</h2>
+                <p class="text-center text-slate-300 mb-8 break-keep">역할을 선택하면, 해당 역할의 경험과 지식을 얻게 됩니다.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <!-- Roles will be populated by JS -->
+                </div>
+            </div>
+            
+            <!-- Screen 3: Knowledge Briefing -->
+            <div id="knowledge-screen" class="screen">
+                <h2 class="text-2xl sm:text-3xl font-bold text-center mb-2">지식 브리핑</h2>
+                <p id="role-title" class="text-center text-amber-400 font-bold text-lg mb-6"></p>
+                <div id="knowledge-list" class="bg-slate-800 p-4 sm:p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 max-h-[65vh] overflow-y-auto">
+                    <!-- Knowledge items will be injected here by JS -->
+                </div>
+                <div class="text-center mt-8">
+                    <button id="go-to-ranking-btn" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                        우선순위 정하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- Screen 4: Main Ranking Activity (Individual) -->
+            <div id="main-screen" class="screen">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-center flex-grow">[개인] 생존 물품 우선순위 정하기</h2>
+                    <button id="open-knowledge-modal-btn" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm flex-shrink-0">
+                        내 정보 다시보기 🧠
+                    </button>
+                </div>
+                <div id="rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[60vh] space-y-3 max-h-[65vh] overflow-y-auto">
+                   <!-- Ranking slots will be generated here -->
+                </div>
+                 <div class="text-center mt-8">
+                      <button id="finish-individual-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                          개인 순위 제출하기 <span id="finish-individual-button-counter">(0/15)</span>
+                      </button>
+                 </div>
+            </div>
+
+            <!-- Screen 4.5: Discussion Guide -->
+            <div id="discussion-guide-screen" class="screen">
+                <div class="text-center">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white mb-8">🤝 성공적인 토의를 위한 자세</h2>
+                    <div class="max-w-3xl mx-auto text-left bg-slate-800/50 p-6 sm:p-8 rounded-2xl mb-10 space-y-5">
+                        <div class="flex items-start gap-4">
+                            <span class="text-2xl pt-1">👂</span>
+                            <div>
+                                <h3 class="font-bold text-cyan-300 text-xl">경청하기</h3>
+                                <p class="text-slate-300 break-keep">다른 모둠원의 의견을 끝까지 듣고 존중해주세요.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="text-2xl pt-1">💡</span>
+                            <div>
+                                <h3 class="font-bold text-cyan-300 text-xl">근거 제시하기</h3>
+                                <p class="text-slate-300 break-keep">자신의 주장을 내세울 때는 '왜냐하면'을 붙여 이유를 명확히 설명해주세요.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="text-2xl pt-1">💬</span>
+                            <div>
+                                <h3 class="font-bold text-cyan-300 text-xl">자신있게 의견 말하기</h3>
+                                <p class="text-slate-300 break-keep">조용히 듣기만 하는 것보다, 자신의 의견을 근거와 함께 자신있게 이야기하는 것도 중요해요.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="text-2xl pt-1">🤔</span>
+                            <div>
+                                <h3 class="font-bold text-cyan-300 text-xl">합리적 비판하기</h3>
+                                <p class="text-slate-300 break-keep">의견이 다를 때는 감정적으로 비난하지 말고, 타당한 근거를 들어 설득해보세요.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="text-2xl pt-1">🤝</span>
+                            <div>
+                                <h3 class="font-bold text-cyan-300 text-xl">최선의 답 찾기</h3>
+                                <p class="text-slate-300 break-keep">우리 모둠의 생존을 위해 가장 좋은 방법을 함께 찾아보세요!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="go-to-group-ranking-btn" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                        모둠 토의 시작하기
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Screen 5: Group Ranking Activity -->
+            <div id="group-ranking-screen" class="screen">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-center flex-grow">[모둠] 생존 물품 우선순위 정하기</h2>
+                     <button id="open-knowledge-modal-btn-group" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm flex-shrink-0">
+                         내 정보 다시보기 🧠
+                     </button>
+                </div>
+                <div id="group-rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[60vh] space-y-3 max-h-[65vh] overflow-y-auto">
+                    <!-- Group ranking slots will be generated here -->
+                </div>
+                 <div class="text-center mt-8">
+                      <button id="finish-group-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                          최종 보고서 만들기 <span id="finish-group-button-counter">(0/15)</span>
+                      </button>
+                 </div>
+            </div>
+
+            <!-- Screen 6: Final Report -->
+            <div id="report-screen" class="screen">
+                <div id="report-content" class="p-2">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-center mb-4">바다 생존 보고서</h2>
+                    <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-center text-slate-300 mb-6">
+                        <div class="flex items-center gap-x-1.5">
+                            <span class="font-semibold text-slate-400">소속:</span>
+                            <span id="final-group-name" class="font-bold text-cyan-400"></span>
+                        </div>
+                        <div class="flex items-center gap-x-1.5">
+                            <span class="font-semibold text-slate-400">이름:</span>
+                            <span id="final-student-number" class="font-bold text-cyan-400"></span>번
+                            <span id="final-student-name" class="font-bold text-cyan-400"></span>
+                        </div>
+                        <div class="flex items-center gap-x-1.5">
+                            <span class="font-semibold text-slate-400">역할:</span>
+                            <span id="final-role" class="font-bold text-amber-400"></span>
+                        </div>
+                    </div>
+                     <div id="score-summary-container" class="bg-slate-900/50 p-4 rounded-lg">
+                        <!-- Score and evaluation will be injected here -->
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                        <!-- Individual Report -->
+                        <div class="bg-slate-900/50 p-4 rounded-lg flex flex-col">
+                            <h3 class="text-xl font-bold text-center mb-4 text-yellow-300">나의 생존 계획</h3>
+                            <div id="individual-score-summary" class="text-center mb-4"></div>
+                            <div id="individual-final-list" class="space-y-2 flex-grow overflow-y-auto bg-slate-800 p-3 rounded-md max-h-[50vh] lg:max-h-[45vh]"></div>
+                        </div>
+                        <!-- Group Report -->
+                         <div class="bg-slate-900/50 p-4 rounded-lg flex flex-col">
+                            <h3 class="text-xl font-bold text-center mb-4 text-teal-300">우리 모둠의 생존 계획</h3>
+                            <div id="group-score-summary" class="text-center mb-4"></div>
+                            <div id="group-final-list" class="space-y-2 flex-grow overflow-y-auto bg-slate-800 p-3 rounded-md max-h-[50vh] lg:max-h-[45vh]"></div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="text-center mt-6 flex flex-col sm:flex-row sm:justify-center gap-2 sm:gap-4">
+                     <button id="open-save-share-modal-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                         결과 저장하기
+                     </button>
+                      <a href="https://pinkylucky.tistory.com/8" target="_blank" rel="noopener noreferrer" class="inline-block w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition">
+                         전문가 해설 보기
+                      </a>
+                      <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                         다시하기
+                      </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Screen 1.5: Emergency Sequence -->
+    <div id="emergency-screen" class="flex flex-col items-center justify-center p-8">
+        <div id="emergency-message-container" class="text-white text-xl sm:text-2xl md:text-3xl font-bold text-center space-y-6">
+            <!-- Messages will be injected here -->
+        </div>
+        <button id="skip-emergency-btn" class="absolute top-5 right-5 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg z-10">SKIP</button>
+        <button id="proceed-to-guide-btn" class="mt-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-lg hidden transition-opacity animate-pulse">
+            활동 안내 확인하기
+        </button>
+    </div>
+
+    <!-- Modals and Global Buttons -->
+    <div id="global-buttons" class="fixed bottom-5 left-5 right-5 flex justify-between items-center z-50 pointer-events-none">
+        <button id="back-to-start-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-transform hover:scale-105 hidden pointer-events-auto">처음으로</button>
+        <button id="exit-app-btn" class="bg-red-800 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-transform hover:scale-105 hidden pointer-events-auto ml-auto">종료</button>
+    </div>
+    
+    <!-- Item Info Modal -->
+    <div id="item-info-modal" class="modal-base">
+        <div class="modal-content bg-slate-900 rounded-lg border border-slate-700">
+            <span class="close-modal-btn absolute top-4 right-5 text-3xl font-bold cursor-pointer hover:text-red-500">&times;</span>
+            <div id="item-info-modal-body" class="text-white"></div>
+        </div>
+    </div>
+    
+    <!-- Item Selection Modal -->
+    <div id="item-selection-modal" class="modal-base">
+        <div class="modal-content bg-slate-900 rounded-lg border border-slate-700">
+             <span class="close-modal-btn absolute top-4 right-5 text-3xl font-bold cursor-pointer hover:text-red-500">&times;</span>
+            <h3 class="text-2xl font-bold mb-4 text-center text-emerald-400">사용 가능한 물품 선택</h3>
+            <div id="item-selection-modal-body" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto p-2"></div>
+        </div>
+    </div>
+
+    <!-- Save/Share Modal -->
+    <div id="save-share-modal" class="modal-base">
+        <div class="modal-content bg-slate-900 rounded-lg border border-slate-700 text-center">
+            <span class="close-modal-btn absolute top-4 right-5 text-3xl font-bold cursor-pointer hover:text-red-500">&times;</span>
+            <h3 class="text-2xl font-bold mb-6 text-emerald-400">결과 저장 및 공유</h3>
+            <div class="flex flex-col gap-4">
+                <button id="save-image-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all">🖼️ 이미지로 저장</button>
+                <button id="share-image-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all">🔗 공유하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Knowledge Modal -->
+    <div id="knowledge-modal" class="modal-base">
+        <div class="modal-content bg-slate-900 rounded-lg border border-slate-700">
+            <span class="close-modal-btn absolute top-4 right-5 text-3xl font-bold cursor-pointer hover:text-red-500">&times;</span>
+            <div id="knowledge-modal-body" class="text-white"></div>
+        </div>
+    </div>
+
+    <!-- General Alert/Confirm Modal -->
+    <div id="alert-confirm-modal" class="modal-base">
+        <div class="modal-content bg-slate-900 rounded-lg border border-slate-700 text-center max-w-md">
+            <h3 id="alert-confirm-title" class="text-xl font-bold mb-4 text-yellow-300"></h3>
+            <p id="alert-confirm-message" class="text-slate-300 mb-6"></p>
+            <div id="alert-confirm-buttons" class="flex justify-center gap-4"></div>
+        </div>
+    </div>
+    
+    <audio id="bg-music" loop></audio>
+
+    <script>
+    (function() {
+        // --- App State and Data ---
+        const SAVE_KEY = 'sea-survival-team-v1.0';
+        const APP_VERSION = 'sea-team-1.0';
+
+        let emergencySequenceTimeoutId = null;
+        let activeSelectionContext = { type: null, slotIndex: null };
+        
+        const appData = {
+            getEmergencyMessages: (state) => [
+                "경고. 경고. 선체 화재 발생.",
+                "항해 장비 및 통신 장비 파손 확인.",
+                "요트가 서서히 침몰하고 있다.",
+                `'${state.groupName || '생존자 그룹'}', 응답하라!`,
+                "가장 가까운 육지까지는 약 1,600km.",
+                `'${state.studentName || '생존자'}', 당신의 판단에 모두의 생존이 달려있다.`,
+                "15개 비상 물품의 생존 순위를 정하라.",
+                "반드시... 반드시 살아남아라!"
+            ],
+            roles: {
+                influencer: { name: 'SNS 인플루언서', imageUrl: 'https://placehold.co/400x400/1e293b/e2e8f0?text=Influencer', description: "어떤 상황에서도 '좋아요'를 부르는 감각을 가졌습니다.", info: [ "거울로 빛을 반사시키면 멀리서도 엄청 잘 보입니다! '인생샷' 찍을 때 조명판으로 쓰는 것과 같은 원리입니다.", "급하다고 바닷물을 마시면 안 돼요! 피부가 상하거든요.", "반짝이는 건 뭐든 구조 신호로 쓸 수 있어요. 기름을 물에 풀면 햇빛에 반짝여서 드론 샷처럼 보일 거예요!", "라디오가 있으면 구조 요청 음악을 틀어서 우리 위치를 알릴 수 있지 않을까요?", "초콜릿은 비상 상황 '먹방' 콘텐츠에 필수품입니다.", "구조되면 이 모든 경험을 '브이로그'로 만들어야 하니, 럼주는 축하 파티를 위해 아껴둬야 합니다." ] },
+                trainer: { name: '헬스 트레이너', imageUrl: 'https://placehold.co/400x400/1e293b/e2e8f0?text=Trainer', description: "인체의 한계와 신체 능력 유지에 대한 지식이 있습니다.", info: [ "탈수를 막는 것이 제일 중요합니다. 물 없이는 근육 손실이 급격하게 일어납니다.", "비닐 시트는 필수예요. 이걸로 햇빛을 가려서 체온 상승과 탈수를 막고, 비가 오면 식수를 받을 수 있어요.", "초콜릿은 빠른 에너지 공급원(부스터)이지만, 이후에 급격한 피로감을 유발할 수 있습니다.", "럼주는 도수가 높으니 마시면 체온을 올려서 추위를 이기는 데 도움이 될 것입니다.", "바닷물에 젖은 옷은 체온을 유지해주니까 그냥 입고 있는 게 나아요. 벗으면 감기 걸려요.", "가만히 있는 것보다 보트 주변에서 수영하며 체력을 유지하는 것이 중요합니다." ] },
+                angler: { name: '낚시광', imageUrl: 'https://placehold.co/400x400/1e293b/e2e8f0?text=Angler', description: "바다와 물고기에 대한 풍부한 실전 경험을 가졌습니다.", info: [ "낚시 도구는 물고기를 잡아 중요한 단백질을 공급해 줄 수 있습니다.", "밧줄이 있으면 낚싯줄이 끊어졌을 때 대체용으로 쓰거나, 더 큰 물고기를 잡을 덫을 만들 수 있어요.", "물고기의 피는 짜지만, 급할 때 수분을 보충하는 데 도움이 될 수 있습니다.", "모기장 그물이 촘촘해서 작은 물고기를 잡는 데 최고입니다.", "기름을 물에 조금씩 흘려보내면 물고기들이 냄새를 맡고 모여들어서 낚시가 더 잘 될 겁니다.", "저는 예전에 이 낚싯대와 비슷한 걸로 1미터짜리 참치도 낚아봤습니다." ] },
+                diy: { name: 'DIY 취미가', imageUrl: 'https://placehold.co/400x400/1e293b/e2e8f0?text=DIY+Hobbyist', description: "주어진 도구로 무엇이든 만들어내는 손재주가 있습니다.", info: [ "비닐 시트와 밧줄이 있으면 빗물을 모으는 장치를 만들 수 있습니다.", "기름통은 비운 뒤에 물에 띄우면 아주 훌륭한 부표가 됩니다. 밧줄로 우리 몸에 묶어두면 안전해요.", "항해용 각도기의 렌즈를 이용하면 햇빛을 모아 불을 피울 수도 있습니다.", "해도(지도)는 종이니까 찢어서 불쏘시개로 쓰면 돼요. 항해용 각도기 렌즈로 불을 붙이면 되고요.", "라디오를 분해해서 나오는 부품들로 새로운 구조 신호 장치를 만들 수 있을 겁니다.", "상어 퇴치제 통은 다 쓰고 나면 훌륭한 빗물받이 통이 될 수 있어요. 내용물은 일단 버리고..." ] }
+            },
+            items: [
+                { id: 1, name: '항해용 각도기', uscgRank: 15, icon: '🧭', description: '별의 각도를 재어 위치를 계산하는 항해용 전문 도구입니다.' },
+                { id: 2, name: '면도용 거울', uscgRank: 1, icon: '🪞', description: '자신의 모습을 비춰볼 수 있는 작은 손거울입니다.' },
+                { id: 3, name: '20리터 물통', uscgRank: 3, icon: '💧', description: '마실 수 있는 깨끗한 물이 20리터 담긴 통입니다.' },
+                { id: 4, name: '모기장', uscgRank: 14, icon: '🕸️', description: '모기를 막기 위한 촘촘한 그물입니다.' },
+                { id: 5, name: '비상식량 한 박스', uscgRank: 4, icon: '🥫', description: '장기간 보관이 가능한 비상 식량입니다.' },
+                { id: 6, name: '남태평양 해도', uscgRank: 13, icon: '🗺️', description: '남태평양의 수심, 해류 등이 표시된 바다 지도입니다.' },
+                { id: 7, name: '좌석용 부유 쿠션', uscgRank: 9, icon: '🛟', description: '물에 뜨는 재질로 만들어진 좌석 쿠션입니다.' },
+                { id: 8, name: '10리터 기름통', uscgRank: 2, icon: '⛽', description: '기름과 오일이 섞여 있는 금속 용기입니다.' },
+                { id: 9, name: '소형 라디오', uscgRank: 12, icon: '📻', description: '주파수를 맞춰 방송을 들을 수 있는 소형 트랜지스터 라디오입니다.' },
+                { id: 10, name: '상어 퇴치제', uscgRank: 10, icon: '🦈', description: '상어가 싫어하는 화학 물질이 담긴 통입니다.' },
+                { id: 11, name: '불투명 비닐 시트', uscgRank: 5, icon: '⬛', description: '20제곱미터 크기의 크고 질긴 불투명 비닐입니다.' },
+                { id: 12, name: '럼주 한 병', uscgRank: 11, icon: '🍾', description: '알코올 도수 40도의 럼주가 담긴 병입니다.' },
+                { id: 13, name: '15m 나일론 밧줄', uscgRank: 8, icon: '🧶', description: '길고 튼튼한 나일론 소재의 밧줄입니다.' },
+                { id: 14, name: '초콜릿 두 상자', uscgRank: 6, icon: '🍫', description: '간식으로 먹을 수 있는 초콜릿입니다.' },
+                { id: 15, name: '낚시 도구 세트', uscgRank: 7, icon: '🎣', description: '낚싯대, 릴, 낚싯줄, 미끼 등이 포함된 세트입니다.' }
+            ],
+            state: {}
+        };
+
+        const dom = {
+            appContainer: document.getElementById('app-container'),
+            rankListEl: document.getElementById('rank-list'),
+            groupRankListEl: document.getElementById('group-rank-list'),
+            itemInfoModalEl: document.getElementById('item-info-modal'),
+            itemInfoModalBodyEl: document.getElementById('item-info-modal-body'),
+            itemSelectionModalEl: document.getElementById('item-selection-modal'),
+            itemSelectionModalBodyEl: document.getElementById('item-selection-modal-body'),
+            saveShareModalEl: document.getElementById('save-share-modal'),
+            knowledgeModalEl: document.getElementById('knowledge-modal'),
+            knowledgeModalBodyEl: document.getElementById('knowledge-modal-body'),
+            alertConfirmModalEl: document.getElementById('alert-confirm-modal'),
+            alertConfirmTitle: document.getElementById('alert-confirm-title'),
+            alertConfirmMessage: document.getElementById('alert-confirm-message'),
+            alertConfirmButtons: document.getElementById('alert-confirm-buttons'),
+            emergencyScreen: document.getElementById('emergency-screen'),
+            emergencyMessageContainer: document.getElementById('emergency-message-container'),
+            proceedToGuideBtn: document.getElementById('proceed-to-guide-btn'),
+            skipEmergencyBtn: document.getElementById('skip-emergency-btn'),
+            groupNameInput: document.getElementById('groupNameInput'),
+            studentNumberInput: document.getElementById('studentNumberInput'),
+            studentNameInput: document.getElementById('studentNameInput'),
+            roleTitle: document.getElementById('role-title'),
+            knowledgeList: document.getElementById('knowledge-list'),
+            finishIndividualButton: document.getElementById('finish-individual-button'),
+            finishIndividualButtonCounter: document.getElementById('finish-individual-button-counter'),
+            finishGroupButton: document.getElementById('finish-group-button'),
+            finishGroupButtonCounter: document.getElementById('finish-group-button-counter'),
+            finalGroupName: document.getElementById('final-group-name'),
+            finalStudentNumber: document.getElementById('final-student-number'),
+            finalStudentName: document.getElementById('final-student-name'),
+            finalRole: document.getElementById('final-role'),
+            scoreSummaryContainer: document.getElementById('score-summary-container'),
+            individualScoreSummary: document.getElementById('individual-score-summary'),
+            groupScoreSummary: document.getElementById('group-score-summary'),
+            individualFinalList: document.getElementById('individual-final-list'),
+            groupFinalList: document.getElementById('group-final-list'),
+            backToStartBtn: document.getElementById('back-to-start-btn'),
+            exitAppBtn: document.getElementById('exit-app-btn'),
+            fullscreenBtn: document.getElementById('fullscreen-btn'),
+            fsEnterIcon: document.getElementById('fs-enter-icon'),
+            fsExitIcon: document.getElementById('fs-exit-icon'),
+            bgMusic: document.getElementById('bg-music'),
+        };
+        
+        // --- All Functions Defined Here ---
+        const saveState = () => {
+            try {
+                if (['welcome-screen', 'setup-screen', 'emergency-screen'].includes(appData.state.currentScreen)) return;
+
+                const saveReasons = (type) => {
+                    const rankedItems = type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems;
+                    const listEl = type === 'individual' ? dom.rankListEl : dom.groupRankListEl;
+                    const reasonAttribute = type === 'individual' ? 'data-reason-for-item' : 'data-reason-for-group-item';
+
+                    rankedItems.forEach((itemData, index) => {
+                        if (itemData) {
+                            const textarea = listEl.querySelector(`textarea[${reasonAttribute}="${itemData.id}"]`);
+                            if (textarea) rankedItems[index].reason = textarea.value;
+                        }
+                    });
+                };
+                
+                if(appData.state.currentScreen === 'main-screen') saveReasons('individual');
+                if(appData.state.currentScreen === 'group-ranking-screen') saveReasons('group');
+
+                localStorage.setItem(SAVE_KEY, JSON.stringify({ ...appData.state, version: APP_VERSION }));
+            } catch (e) { console.error("저장 중 오류:", e); }
+        };
+
+        const autoSave = () => saveState();
+        
+        const getNewState = () => ({
+            currentScreen: 'setup-screen',
+            groupName: '', studentName: '', studentNumber: '',
+            selectedRole: null,
+            rankedItems: Array(15).fill(null),
+            groupRankedItems: Array(15).fill(null),
+        });
+
+        const showScreen = (screenId) => {
+            // emergency-screen(미션 브리핑)이 아닌 다른 화면으로 전환될 때 음악을 정지시킵니다.
+            if (screenId !== 'emergency-screen') {
+                stopMusicAndClear();
+            }
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            dom.emergencyScreen.style.display = 'none';
+
+            const activeScreen = document.getElementById(screenId);
+            if (screenId === 'emergency-screen') {
+                dom.emergencyScreen.style.display = 'flex';
+                [dom.backToStartBtn, dom.exitAppBtn].forEach(btn => btn.classList.add('hidden'));
+            } else if (activeScreen) {
+                activeScreen.classList.add('active-screen');
+                const isIntro = ['welcome-screen', 'setup-screen'].includes(screenId);
+                [dom.backToStartBtn, dom.exitAppBtn].forEach(btn => btn.classList.toggle('hidden', isIntro));
+            }
+            appData.state.currentScreen = screenId;
+            if (!['welcome-screen', 'setup-screen', 'emergency-screen'].includes(screenId)) saveState();
+        };
+
+        const restartApp = () => {
+            localStorage.removeItem(SAVE_KEY);
+            window.location.reload();
+        };
+        
+        const openModal = (modalEl) => modalEl.classList.add('show');
+        const closeModal = (modalEl) => modalEl.classList.remove('show');
+
+        const showAlert = (message, title = '알림') => {
+            dom.alertConfirmTitle.textContent = title;
+            dom.alertConfirmMessage.textContent = message;
+            dom.alertConfirmButtons.innerHTML = `<button class="modal-ok-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">확인</button>`;
+            openModal(dom.alertConfirmModalEl);
+        };
+
+        const showConfirm = (message, onConfirm, title = '확인', options = {}) => {
+            const {
+                onCancel = () => {},
+                okText = '확인',
+                cancelText = '취소',
+                okClass = 'bg-red-600 hover:bg-red-700',
+                cancelClass = 'bg-gray-500 hover:bg-gray-600'
+            } = options;
+
+            dom.alertConfirmTitle.textContent = title;
+            dom.alertConfirmMessage.textContent = message;
+            dom.alertConfirmButtons.innerHTML = `
+                <button class="modal-cancel-btn ${cancelClass} text-white font-bold py-2 px-6 rounded-lg">${cancelText}</button>
+                <button class="modal-ok-btn ${okClass} text-white font-bold py-2 px-6 rounded-lg">${okText}</button>
+            `;
+            openModal(dom.alertConfirmModalEl);
+            
+            dom.alertConfirmModalEl.querySelector('.modal-ok-btn').onclick = () => { closeModal(dom.alertConfirmModalEl); onConfirm(); };
+            dom.alertConfirmModalEl.querySelector('.modal-cancel-btn').onclick = () => { closeModal(dom.alertConfirmModalEl); onCancel(); };
+        };
+
+        const updateFullscreenIcons = () => {
+            if (document.fullscreenElement) {
+                dom.fsEnterIcon.classList.add('hidden');
+                dom.fsExitIcon.classList.remove('hidden');
+            } else {
+                dom.fsEnterIcon.classList.remove('hidden');
+                dom.fsExitIcon.classList.add('hidden');
+            }
+        };
+
+        const toggleFullScreen = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    showAlert(`전체화면 모드를 시작할 수 없습니다: ${err.message}`);
+                });
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        };
+
+        const startMission = () => {
+            appData.state.groupName = dom.groupNameInput.value.trim();
+            appData.state.studentName = dom.studentNameInput.value.trim();
+            appData.state.studentNumber = dom.studentNumberInput.value;
+            if (!appData.state.groupName || !appData.state.studentName || !appData.state.studentNumber) {
+                showAlert('소속, 번호, 이름을 모두 입력/선택해주세요!');
+                return;
+            }
+            saveState();
+            showEmergencySequence();
+        };
+        
+        const showEmergencySequence = () => {
+            showScreen('emergency-screen');
+            // 미션 브리핑 화면이 시작될 때만 배경 음악(seastorm.mp3)을 로드하고 재생합니다.
+            if (dom.bgMusic) {
+                dom.bgMusic.src = 'seastorm.mp3';
+                dom.bgMusic.play().catch(e => console.log("음악 자동 재생이 차단되었습니다.", e));
+            }
+            dom.emergencyMessageContainer.innerHTML = '';
+            dom.proceedToGuideBtn.classList.add('hidden');
+            dom.skipEmergencyBtn.classList.remove('hidden');
+
+            let messageIndex = 0;
+            const messages = appData.getEmergencyMessages(appData.state);
+            const showNextMessage = () => {
+                if (emergencySequenceTimeoutId) clearTimeout(emergencySequenceTimeoutId);
+                if (messageIndex >= messages.length) {
+                    dom.skipEmergencyBtn.classList.add('hidden');
+                    dom.proceedToGuideBtn.classList.remove('hidden');
+                    return;
+                }
+                const p = document.createElement('p');
+                p.className = 'break-keep';
+                p.textContent = messages[messageIndex];
+                dom.emergencyMessageContainer.appendChild(p);
+                messageIndex++;
+                emergencySequenceTimeoutId = setTimeout(showNextMessage, 2200);
+            };
+            showNextMessage();
+        };
+        
+        const stopMusicAndClear = () => {
+            // 배경 음악을 정지하고 재생 시간과 소스(src)를 초기화합니다.
+            if (dom.bgMusic) {
+                dom.bgMusic.pause();
+                dom.bgMusic.currentTime = 0;
+                dom.bgMusic.src = '';
+            }
+        };
+
+        const skipEmergencySequence = () => {
+            if (emergencySequenceTimeoutId) clearTimeout(emergencySequenceTimeoutId);
+            const messages = appData.getEmergencyMessages(appData.state);
+            dom.emergencyMessageContainer.innerHTML = messages
+                .map(msg => `<p style="animation: none; opacity: 1;" class="break-keep">${msg}</p>`).join('');
+            dom.skipEmergencyBtn.classList.add('hidden');
+            dom.proceedToGuideBtn.classList.remove('hidden');
+        };
+
+        const selectRole = (roleId) => {
+            appData.state.selectedRole = roleId;
+            const role = appData.roles[roleId];
+            dom.roleTitle.innerText = `[${role.name}]`;
+            
+            const roleInfoList = role.info.map(fact => `<div class="bg-slate-700 p-3 rounded break-keep">- ${fact}</div>`).join('');
+            const itemsList = appData.items.map(item => `
+                <div class="bg-slate-700 p-3 rounded">
+                    <p class="font-bold">${item.icon} ${item.name}</p>
+                    <p class="text-sm text-slate-400 mt-1 break-keep">${item.description}</p>
+                </div>
+            `).join('');
+
+            dom.knowledgeList.innerHTML = `
+                <h4 class="text-lg font-bold text-amber-300 md:col-span-2">🧠 나의 정보</h4>
+                ${roleInfoList}
+                <hr class="border-slate-600 my-2 md:col-span-2">
+                <h4 class="text-lg font-bold text-cyan-300 md:col-span-2">🎒 전체 물품 정보</h4>
+                ${itemsList}
+            `;
+            showScreen('knowledge-screen');
+        };
+        
+        const updateFinishButtonState = (type) => {
+            const rankedItems = type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems;
+            const button = type === 'individual' ? dom.finishIndividualButton : dom.finishGroupButton;
+            const counter = type === 'individual' ? dom.finishIndividualButtonCounter : dom.finishGroupButtonCounter;
+            
+            const itemCount = rankedItems.filter(item => item !== null).length;
+            counter.textContent = `(${itemCount}/15)`;
+            button.disabled = (itemCount !== 15);
+        };
+        
+        const renderRankingSlots = (type) => {
+            const listEl = type === 'individual' ? dom.rankListEl : dom.groupRankListEl;
+            const rankedItems = type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems;
+            const reasonAttribute = type === 'individual' ? 'data-reason-for-item' : 'data-reason-for-group-item';
+
+            listEl.innerHTML = '';
+            rankedItems.forEach((itemData, index) => {
+                const slotEl = document.createElement('div');
+                slotEl.dataset.slotIndex = index;
+                slotEl.dataset.rankType = type;
+
+                if (itemData) {
+                    const item = appData.items.find(i => i.id === itemData.id);
+                    slotEl.className = 'rank-slot filled bg-slate-800 p-3 rounded-md';
+                    slotEl.dataset.itemId = item.id;
+                    slotEl.innerHTML = `
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="drag-handle">⠿</span>
+                            <div class="flex-1 min-w-0 font-bold text-lg text-amber-400 flex items-center pointer-events-none">
+                                <span class="rank-number mr-2">${index + 1}위.</span>
+                                <span>${item.icon} ${item.name}</span>
+                            </div>
+                            <button data-info-id="${item.id}" class="text-xs bg-sky-600 hover:bg-sky-500 text-white py-1 px-2 rounded ml-auto flex-shrink-0">정보</button>
+                            <button data-clear-slot="${index}" data-clear-type="${type}" class="text-xs bg-red-600 hover:bg-red-500 text-white py-1 px-2 rounded flex-shrink-0">X</button>
+                        </div>
+                        <textarea ${reasonAttribute}="${item.id}" class="w-full bg-slate-900 text-white rounded p-2 text-sm" rows="2" placeholder="이 물품을 이 순위로 정한 이유는...">${itemData.reason || ''}</textarea>
+                    `;
+                } else {
+                    slotEl.className = 'rank-slot empty bg-slate-900/50 p-3 rounded-md border-2 border-slate-700 flex items-center justify-center h-24 transition';
+                    slotEl.innerHTML = `<div class="text-center text-slate-500"><span class="font-bold text-xl">${index + 1}위</span><p class="text-sm">클릭하여 물품 선택</p></div>`;
+                }
+                listEl.appendChild(slotEl);
+            });
+            updateFinishButtonState(type);
+        };
+        
+        const openItemSelectionModal = (slotIndex, type) => {
+            activeSelectionContext = { type, slotIndex };
+            const rankedItemIds = new Set( (type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems).filter(Boolean).map(item => item.id) );
+            const availableItems = appData.items.filter(item => !rankedItemIds.has(item.id));
+            
+            dom.itemSelectionModalBodyEl.innerHTML = availableItems.length ? 
+                availableItems.map(item => `
+                    <button class="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-left transition" data-item-id="${item.id}">
+                        <p class="font-bold text-lg">${item.icon} ${item.name}</p>
+                    </button>
+                `).join('') : 
+                `<p class="text-center text-slate-400 col-span-full">모든 물품이 선택되었습니다.</p>`;
+            
+            openModal(dom.itemSelectionModalEl);
+        };
+
+        const generateReport = () => {
+            dom.finalGroupName.textContent = appData.state.groupName;
+            dom.finalStudentName.textContent = appData.state.studentName;
+            dom.finalStudentNumber.textContent = appData.state.studentNumber;
+            dom.finalRole.textContent = (appData.state.selectedRole && appData.roles[appData.state.selectedRole]?.name) || '미정';
+            
+            let groupTotalScore = 0;
+
+            const calculateScoreAndRenderList = (type) => {
+                const rankedItems = type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems;
+                const listEl = type === 'individual' ? dom.individualFinalList : dom.groupFinalList;
+                const summaryEl = type === 'individual' ? dom.individualScoreSummary : dom.groupScoreSummary;
+                
+                let totalScore = 0;
+                listEl.innerHTML = rankedItems.map((itemData, index) => {
+                    if (!itemData) return '';
+                    const item = appData.items.find(i => i.id === itemData.id);
+                    const userRank = index + 1;
+                    totalScore += Math.abs(userRank - item.uscgRank);
+                    return `
+                        <div class="p-2 bg-slate-800 rounded-md text-sm">
+                            <p class="font-bold">${userRank}위. ${item.icon} ${item.name}</p>
+                            <p class="text-sm text-slate-400 mt-1 pl-3 break-keep">이유: ${itemData.reason || '작성하지 않음'}</p>
+                        </div>
+                    `;
+                }).join('');
+
+                let evaluation = '';
+                if (totalScore <= 25) { evaluation = '생존 전문가! 해안경비대에서 연락 올 겁니다.'; }
+                else if (totalScore <= 32) { evaluation = '훌륭합니다! 함께 표류하고 싶은 동료입니다.'; }
+                else if (totalScore <= 45) { evaluation = '아슬아슬... 구조선이 빨리 오길 빕니다.'; }
+                else if (totalScore <= 55) { evaluation = '위험합니다! 상어가 친구하자고 할지도...'; }
+                else { evaluation = '이런... 바다거북이와 대화하게 될지도 모릅니다.'; }
+                
+                summaryEl.innerHTML = `
+                    <p class="text-lg font-bold">총점: <span class="text-red-400">${totalScore}점</span></p>
+                    <p class="text-base mt-1">"${evaluation}"</p>
+                `;
+                if(type === 'group') groupTotalScore = totalScore;
+            };
+
+            calculateScoreAndRenderList('individual');
+            calculateScoreAndRenderList('group');
+            
+            let resultImage = '';
+            let resultClass = '';
+            if (groupTotalScore <= 25) { resultClass = 'border-emerald-400'; resultImage = 'https://placehold.co/160x160/10b981/ffffff?text=Excellent'; } 
+            else if (groupTotalScore <= 32) { resultClass = 'border-sky-400'; resultImage = 'https://placehold.co/160x160/38bdf8/ffffff?text=Good'; } 
+            else if (groupTotalScore <= 45) { resultClass = 'border-yellow-400'; resultImage = 'https://placehold.co/160x160/facc15/ffffff?text=Average'; } 
+            else if (groupTotalScore <= 55) { resultClass = 'border-amber-500'; resultImage = 'https://placehold.co/160x160/f59e0b/ffffff?text=Danger'; } 
+            else { resultClass = 'border-red-500'; resultImage = 'https://placehold.co/160x160/ef4444/ffffff?text=Failure'; }
+
+            dom.scoreSummaryContainer.innerHTML = `
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
+                        <img id="result-image" src="${resultImage}" alt="결과 이미지" class="w-full h-full object-cover rounded-lg bg-slate-700" onerror="this.onerror=null;this.src='https://placehold.co/160x160/1e293b/94a3b8?text=Image+Error';">
+                    </div>
+                    <div class="text-center md:text-left">
+                        <p class="text-xl sm:text-2xl font-bold">모둠 총점: <span class="text-red-400">${groupTotalScore}점</span></p>
+                        <p class="text-slate-400 text-sm">(낮을수록 생존 확률이 높습니다)</p>
+                    </div>
+                </div>
+            `;
+            dom.scoreSummaryContainer.className = `p-4 rounded-lg border-2 transition-colors duration-500 ${resultClass}`;
+
+            showScreen('report-screen');
+        };
+
+        const openKnowledgeModal = () => {
+            if (!appData.state.selectedRole) return;
+            const role = appData.roles[appData.state.selectedRole];
+            
+            const roleInfoList = role.info.map(fact => `<div class="bg-slate-700 p-3 rounded break-keep">- ${fact}</div>`).join('');
+            const itemsList = appData.items.map(item => `
+                <div class="bg-slate-700 p-3 rounded">
+                    <p class="font-bold">${item.icon} ${item.name}</p>
+                    <p class="text-sm text-slate-400 mt-1 break-keep">${item.description}</p>
+                </div>
+            `).join('');
+
+            dom.knowledgeModalBodyEl.innerHTML = `
+                <h3 class="text-2xl font-bold mb-4 text-center">정보 다시보기</h3>
+                <div class="max-h-[60vh] overflow-y-auto p-2 space-y-4">
+                    <div>
+                        <h4 class="text-lg font-bold text-amber-300 mb-2">🧠 [${role.name}] 나의 정보</h4>
+                        <div class="space-y-2">${roleInfoList}</div>
+                    </div>
+                    <hr class="border-slate-600 my-4">
+                    <div>
+                        <h4 class="text-lg font-bold text-cyan-300 mb-2">🎒 전체 물품 정보</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${itemsList}</div>
+                    </div>
+                </div>
+            `;
+            openModal(dom.knowledgeModalEl);
+        };
+        
+        const restoreSession = () => {
+            try {
+                const savedStateJSON = localStorage.getItem(SAVE_KEY);
+                if (!savedStateJSON) return false;
+                
+                const savedState = JSON.parse(savedStateJSON);
+                 if (savedState.version !== APP_VERSION) {
+                     localStorage.removeItem(SAVE_KEY);
+                     return false;
+                 }
+
+                appData.state = savedState;
+                dom.groupNameInput.value = appData.state.groupName || '';
+                dom.studentNumberInput.value = appData.state.studentNumber || '';
+                dom.studentNameInput.value = appData.state.studentName || '';
+
+                const screenToRestore = appData.state.currentScreen;
+                showScreen(screenToRestore);
+
+                if (screenToRestore === 'main-screen') renderRankingSlots('individual');
+                if (screenToRestore === 'group-ranking-screen') renderRankingSlots('group');
+                if (screenToRestore === 'report-screen') generateReport();
+                if (['activity-guide-screen', 'role-screen', 'knowledge-screen'].includes(screenToRestore)) {
+                    // No specific render needed, just show the screen
+                }
+
+                return true;
+            } catch (e) {
+                localStorage.removeItem(SAVE_KEY);
+                return false;
+            }
+        };
+
+        const generateReportCanvas = () => {
+            const reportContent = document.getElementById('report-content');
+            
+            const individualList = document.getElementById('individual-final-list');
+            const groupList = document.getElementById('group-final-list');
+            const oldIndividualHeight = individualList.style.maxHeight;
+            const oldGroupHeight = groupList.style.maxHeight;
+            individualList.style.maxHeight = 'none';
+            groupList.style.maxHeight = 'none';
+            individualList.style.overflow = 'visible';
+            groupList.style.overflow = 'visible';
+
+            return new Promise((resolve) => {
+                html2canvas(reportContent, { 
+                    backgroundColor: "#030712",
+                    onclone: (doc) => { doc.getElementById('report-content').style.color = '#e6f1ff'; }
+                }).then(canvas => {
+                    individualList.style.maxHeight = oldIndividualHeight;
+                    groupList.style.maxHeight = oldGroupHeight;
+                    individualList.style.overflow = 'auto';
+                    groupList.style.overflow = 'auto';
+                    resolve(canvas);
+                });
+            });
+        };
+        
+        const downloadReport = () => {
+             generateReportCanvas().then(canvas => {
+                const link = document.createElement('a');
+                const groupName = appData.state.groupName || '소속없음';
+                const studentNumber = appData.state.studentNumber || '00';
+                const studentName = appData.state.studentName || '이름없음';
+                link.download = `바다생존_${groupName}_${studentNumber}번_${studentName}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        };
+
+        const shareReport = async () => {
+            try {
+                const canvas = await generateReportCanvas();
+                canvas.toBlob(async (blob) => {
+                    const groupName = appData.state.groupName || '소속없음';
+                    const studentNumber = appData.state.studentNumber || '00';
+                    const studentName = appData.state.studentName || '이름없음';
+                    const fileName = `바다생존_${groupName}_${studentNumber}번_${studentName}.png`;
+                    const file = new File([blob], fileName, { type: 'image/png' });
+
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: '나의 바다 생존 보고서',
+                            text: '바다에서 살아남기! 우리 모둠의 점수를 확인해보세요!',
+                        });
+                    } else {
+                        showAlert('이 브라우저에서는 공유 기능을 지원하지 않습니다.', '알림');
+                    }
+                }, 'image/png');
+            } catch (error) {
+                console.error('공유 기능 오류:', error);
+                showAlert('이미지를 공유하는 중 오류가 발생했습니다.', '오류');
+            }
+        };
+
+        const handleBodyClick = (event) => {
+            const target = event.target;
+            const roleCard = target.closest('.role-card');
+            const emptySlot = target.closest('.rank-slot.empty');
+            const infoButton = target.closest('[data-info-id]');
+            const clearButton = target.closest('[data-clear-slot]');
+            const itemSelectionButton = target.closest('#item-selection-modal-body button');
+            const modalClose = target.closest('.close-modal-btn') || (target.classList.contains('modal-base') && !target.querySelector('.modal-content')) || target.closest('.modal-ok-btn') || target.closest('.modal-cancel-btn');
+
+            const actions = {
+                'start-class-btn': () => {
+                    if (localStorage.getItem(SAVE_KEY)) {
+                        showConfirm(
+                            '저장된 진행 상황을 이어서 하시겠습니까?',
+                            () => { // onConfirm -> Continue
+                                if (!restoreSession()) {
+                                    showAlert("이어할 데이터를 불러오지 못했습니다. 새로 시작합니다.", "오류");
+                                    restartApp();
+                                }
+                            },
+                            '진행 상황 발견',
+                            { 
+                                onCancel: () => { // onCancel -> Start New
+                                    appData.state = getNewState();
+                                    showScreen('setup-screen');
+                                },
+                                okText: '이어하기',
+                                cancelText: '새로 시작',
+                                okClass: 'bg-green-600 hover:bg-green-700',
+                                cancelClass: 'bg-red-600 hover:bg-red-700'
+                            }
+                        );
+                    } else {
+                        appData.state = getNewState();
+                        showScreen('setup-screen');
+                    }
+                },
+                'start-mission-btn': startMission,
+                'skip-emergency-btn': () => { stopMusicAndClear(); skipEmergencySequence(); },
+                'proceed-to-guide-btn': () => { stopMusicAndClear(); showScreen('activity-guide-screen'); },
+                'go-to-role-selection-btn': () => showScreen('role-screen'),
+                'go-to-ranking-btn': () => { showScreen('main-screen'); renderRankingSlots('individual'); },
+                'finish-individual-button': () => { autoSave(); showScreen('discussion-guide-screen'); },
+                'go-to-group-ranking-btn': () => { showScreen('group-ranking-screen'); renderRankingSlots('group'); },
+                'finish-group-button': () => { autoSave(); generateReport(); },
+                'open-knowledge-modal-btn': openKnowledgeModal,
+                'open-knowledge-modal-btn-group': openKnowledgeModal,
+                'back-to-start-btn': () => showConfirm('지금까지의 진행 상황이 모두 사라집니다. 정말 처음으로 돌아가시겠습니까?', restartApp, '처음으로 돌아가기', { okText: '확인', cancelText: '취소' }),
+                'exit-app-btn': () => showConfirm('정말 종료하시겠습니까? 진행 상황은 저장됩니다.', () => window.close(), '종료', { okText: '종료', cancelText: '취소' }),
+                'restart-btn': () => showConfirm('정말 모든 진행 상황을 삭제하고 다시 시작하시겠습니까?', restartApp, '다시 시작하기', { okText: '다시 시작', cancelText: '취소' }),
+                'open-save-share-modal-btn': () => openModal(dom.saveShareModalEl),
+                'save-image-btn': () => { closeModal(dom.saveShareModalEl); downloadReport(); },
+                'share-image-btn': () => { closeModal(dom.saveShareModalEl); shareReport(); },
+            };
+
+            if (actions[target.id]) {
+                actions[target.id]();
+            } else if (roleCard) {
+                selectRole(roleCard.dataset.role);
+            } else if (emptySlot) {
+                openItemSelectionModal(parseInt(emptySlot.dataset.slotIndex, 10), emptySlot.dataset.rankType);
+            } else if (infoButton) {
+                const item = appData.items.find(i => i.id == infoButton.dataset.infoId);
+                if (item) {
+                    dom.itemInfoModalBodyEl.innerHTML = `<h3 class="text-2xl font-bold mb-4">${item.icon} ${item.name}</h3><p class="break-keep">${item.description || '정보 없음'}</p>`;
+                    openModal(dom.itemInfoModalEl);
+                }
+            } else if (clearButton) {
+                const slotIndex = parseInt(clearButton.dataset.clearSlot, 10);
+                const type = clearButton.dataset.clearType;
+                const rankedItems = type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems;
+                rankedItems[slotIndex] = null;
+                renderRankingSlots(type);
+                autoSave();
+            } else if (itemSelectionButton) {
+                const { type, slotIndex } = activeSelectionContext;
+                const rankedItems = type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems;
+                rankedItems[slotIndex] = { id: parseInt(itemSelectionButton.dataset.itemId, 10), reason: '' };
+                closeModal(dom.itemSelectionModalEl);
+                renderRankingSlots(type);
+                autoSave();
+            } else if (modalClose) {
+                closeModal(target.closest('.modal-base'));
+            }
+        };
+        
+        const initialize = () => {
+            for (let i = 1; i <= 40; i++) {
+                const opt = document.createElement('option');
+                opt.value = String(i).padStart(2, '0');
+                opt.textContent = `${i}번`;
+                dom.studentNumberInput.appendChild(opt);
+            }
+
+            const roleContainer = document.querySelector('#role-screen .grid');
+            roleContainer.innerHTML = Object.keys(appData.roles).map(key => {
+                const role = appData.roles[key];
+                return `
+                    <div data-role="${key}" class="role-card bg-slate-800 rounded-lg text-center cursor-pointer hover:bg-slate-700 hover:scale-105 transition-all overflow-hidden">
+                        <img src="${role.imageUrl}" alt="${role.name}" class="w-full aspect-square object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x400/1e293b/94a3b8?text=Image+Error';">
+                        <div class="p-4">
+                           <h3 class="text-xl sm:text-2xl font-bold">${role.name}</h3>
+                           <p class="text-slate-400 text-sm sm:text-base break-keep mt-1">${role.description}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            dom.fullscreenBtn.addEventListener('click', toggleFullScreen);
+            document.addEventListener('fullscreenchange', updateFullscreenIcons);
+            document.body.addEventListener('click', handleBodyClick);
+            
+            ['groupNameInput', 'studentNameInput', 'studentNumberInput'].forEach(id => {
+                dom[id].addEventListener('input', () => { appData.state[id.replace('Input','')] = dom[id].value; });
+            });
+            dom.rankListEl.addEventListener('input', (e) => { if(e.target.matches('textarea')) autoSave(); });
+            dom.groupRankListEl.addEventListener('input', (e) => { if(e.target.matches('textarea')) autoSave(); });
+            
+            new Sortable(dom.rankListEl, { animation: 150, handle: '.drag-handle', onEnd: (evt) => {
+                const itemData = appData.state.rankedItems.splice(evt.oldIndex, 1)[0];
+                appData.state.rankedItems.splice(evt.newIndex, 0, itemData);
+                renderRankingSlots('individual');
+                autoSave();
+            }});
+            new Sortable(dom.groupRankListEl, { animation: 150, handle: '.drag-handle', onEnd: (evt) => {
+                const itemData = appData.state.groupRankedItems.splice(evt.oldIndex, 1)[0];
+                appData.state.groupRankedItems.splice(evt.newIndex, 0, itemData);
+                renderRankingSlots('group');
+                autoSave();
+            }});
+            
+            appData.state = getNewState();
+            showScreen('welcome-screen');
+            updateFullscreenIcons();
+            setInterval(saveState, 30000);
+            window.addEventListener('beforeunload', saveState);
+            document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(); });
+        };
+        
+        initialize();
+    })();
+    </script>
+</body>
+</html>
