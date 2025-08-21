@@ -221,7 +221,6 @@
                 <h2 class="text-2xl sm:text-3xl font-bold text-center mb-6">당신은 누구입니까?</h2>
                 <p class="text-center text-slate-300 mb-8 break-keep">역할을 선택하면, 해당 역할의 경험과 지식을 얻게 됩니다.</p>
                 
-                <!-- ADDED: Role selection warning box -->
                 <div class="max-w-3xl mx-auto mb-8 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-300 text-sm break-keep">
                     <h3 class="font-bold mb-2">▲ 역할 선택 전, 꼭 읽어주세요!</h3>
                     <p>역할 지식은 생존에 대한 <b class="font-bold">단편적인 정보</b>일 뿐입니다. 특정 물품이 언급되었다고 해서 반드시 높은 순위인 것은 아니며, 오히려 낮은 순위일 수도 있습니다.</p>
@@ -255,7 +254,11 @@
                         내 정보 다시보기 🧠
                     </button>
                 </div>
-                <div id="rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[60vh] space-y-3 max-h-[60vh] sm:max-h-[65vh] overflow-y-auto">
+                <!-- ADDED: Tip box for individual ranking -->
+                <div class="max-w-3xl mx-auto mb-4 p-3 bg-sky-900/50 border border-sky-700 rounded-lg text-sky-300 text-sm break-keep text-center">
+                    <p>💡 <b>내 정보 활용 Tip:</b> 내 정보는 합리적인 결정을 돕는 <b>참고 자료</b>입니다. 언급된 물품이 반드시 정답은 아니므로, 종합적인 판단이 중요합니다.</p>
+                </div>
+                <div id="rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[55vh] space-y-3 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto">
                    <!-- Ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
@@ -320,7 +323,11 @@
                            내 정보 다시보기 🧠
                      </button>
                 </div>
-                <div id="group-rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[60vh] space-y-3 max-h-[60vh] sm:max-h-[65vh] overflow-y-auto">
+                <!-- ADDED: Tip box for group ranking -->
+                <div class="max-w-3xl mx-auto mb-4 p-3 bg-sky-900/50 border border-sky-700 rounded-lg text-sky-300 text-sm break-keep text-center">
+                    <p>💡 <b>내 정보 활용 Tip:</b> 내 정보는 합리적인 결정을 돕는 <b>참고 자료</b>입니다. 언급된 물품이 반드시 정답은 아니므로, 종합적인 판단이 중요합니다.</p>
+                </div>
+                <div id="group-rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[55vh] space-y-3 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto">
                     <!-- Group ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
@@ -609,7 +616,6 @@
             openModal(dom.alertConfirmModalEl);
         };
 
-        // MODIFIED: To support single-button (notice) modals
         const showConfirm = (message, onConfirm, title = '확인', options = {}) => {
             const {
                 onCancel = () => {},
@@ -669,7 +675,6 @@
         
         const showEmergencySequence = () => {
             showScreen('emergency-screen');
-            // 미션 브리핑 화면이 시작될 때만 배경 음악(seastorm.mp3)을 로드하고 재생합니다.
             if (dom.bgMusic) {
                 dom.bgMusic.src = 'seastorm.mp3';
                 dom.bgMusic.play().catch(e => console.log("음악 자동 재생이 차단되었습니다.", e));
@@ -698,7 +703,6 @@
         };
         
         const stopMusicAndClear = () => {
-            // 배경 음악을 정지하고 재생 시간과 소스(src)를 초기화합니다.
             if (dom.bgMusic) {
                 dom.bgMusic.pause();
                 dom.bgMusic.currentTime = 0;
@@ -715,7 +719,6 @@
             dom.proceedToGuideBtn.classList.remove('hidden');
         };
 
-        // MODIFIED: Show warning modal first, then proceed
         const selectRole = (roleId) => {
             appData.state.selectedRole = roleId;
             
@@ -733,7 +736,6 @@
                         </div>
                     `).join('');
 
-                    // ADDED: Warning for the knowledge screen
                     const knowledgeScreenWarning = `
                         <div class="mb-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-300 text-xs text-center break-keep md:col-span-2">
                             <p><b>▲ 중요:</b> 역할 지식은 생존에 대한 <b>단편적인 정보</b>일 뿐이며, 특정 물품의 높은 우선순위를 암시하는 것이 아닙니다. 전체 상황을 고려하여 판단하세요.</p>
@@ -753,7 +755,7 @@
                 '▲ 중요 안내',
                 {
                     okText: '확인',
-                    cancelText: null, // Pass null to hide cancel button
+                    cancelText: null,
                     okClass: 'bg-emerald-600 hover:bg-emerald-700'
                 }
             );
@@ -889,7 +891,6 @@
             showScreen('report-screen');
         };
 
-        // MODIFIED: Added warning message to the modal
         const openKnowledgeModal = () => {
             if (!appData.state.selectedRole) return;
             const role = appData.roles[appData.state.selectedRole];
