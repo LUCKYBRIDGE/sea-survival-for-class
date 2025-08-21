@@ -166,7 +166,7 @@
             <div id="setup-screen" class="screen text-center">
                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">승선자 정보 입력</h1>
                  <p class="text-base sm:text-lg md:text-xl text-slate-300 mb-8 max-w-3xl mx-auto break-keep">
-                      당신의 소속과 정보를 입력해주세요.
+                       당신의 소속과 정보를 입력해주세요.
                  </p>
                 <div class="max-w-sm mx-auto mb-8 space-y-4">
                     <div>
@@ -220,6 +220,14 @@
             <div id="role-screen" class="screen">
                 <h2 class="text-2xl sm:text-3xl font-bold text-center mb-6">당신은 누구입니까?</h2>
                 <p class="text-center text-slate-300 mb-8 break-keep">역할을 선택하면, 해당 역할의 경험과 지식을 얻게 됩니다.</p>
+                
+                <!-- ADDED: Role selection warning box -->
+                <div class="max-w-3xl mx-auto mb-8 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-300 text-sm break-keep">
+                    <h3 class="font-bold mb-2">▲ 역할 선택 전, 꼭 읽어주세요!</h3>
+                    <p>역할 지식은 생존에 대한 <b class="font-bold">단편적인 정보</b>일 뿐입니다. 특정 물품이 언급되었다고 해서 반드시 높은 순위인 것은 아니며, 오히려 낮은 순위일 수도 있습니다.</p>
+                    <p class="mt-1">어떤 역할을 선택하든 전문가의 정답 순위는 바뀌지 않습니다.</p>
+                </div>
+
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     <!-- Roles will be populated by JS -->
                 </div>
@@ -251,9 +259,9 @@
                    <!-- Ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
-                      <button id="finish-individual-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                            개인 순위 제출하기 <span id="finish-individual-button-counter">(0/15)</span>
-                      </button>
+                       <button id="finish-individual-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                             개인 순위 제출하기 <span id="finish-individual-button-counter">(0/15)</span>
+                       </button>
                  </div>
             </div>
 
@@ -309,16 +317,16 @@
                 <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                     <h2 class="text-2xl sm:text-3xl font-bold text-center flex-grow">[모둠] 생존 물품 우선순위 정하기</h2>
                      <button id="open-knowledge-modal-btn-group" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm flex-shrink-0">
-                          내 정보 다시보기 🧠
+                           내 정보 다시보기 🧠
                      </button>
                 </div>
                 <div id="group-rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[60vh] space-y-3 max-h-[60vh] sm:max-h-[65vh] overflow-y-auto">
                     <!-- Group ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
-                      <button id="finish-group-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                            최종 보고서 만들기 <span id="finish-group-button-counter">(0/15)</span>
-                      </button>
+                       <button id="finish-group-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                             최종 보고서 만들기 <span id="finish-group-button-counter">(0/15)</span>
+                       </button>
                  </div>
             </div>
 
@@ -342,7 +350,7 @@
                         </div>
                     </div>
                      <div id="score-summary-container" class="bg-slate-900/50 p-4 rounded-lg">
-                         <!-- Score and evaluation will be injected here -->
+                           <!-- Score and evaluation will be injected here -->
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                         <!-- Individual Report -->
@@ -360,15 +368,15 @@
                     </div>
                 </div>
                  <div class="text-center mt-6 flex flex-col sm:flex-row sm:justify-center gap-2 sm:gap-4">
-                       <button id="open-save-share-modal-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
-                             결과 저장하기
-                       </button>
-                      <a href="https://pinkylucky.tistory.com/8" target="_blank" rel="noopener noreferrer" class="inline-block w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition">
-                            전문가 해설 보기
-                      </a>
-                      <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
-                            다시하기
-                      </button>
+                        <button id="open-save-share-modal-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                              결과 저장하기
+                        </button>
+                    <a href="https://pinkylucky.tistory.com/8" target="_blank" rel="noopener noreferrer" class="inline-block w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition">
+                          전문가 해설 보기
+                    </a>
+                    <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                          다시하기
+                    </button>
                  </div>
             </div>
         </div>
@@ -432,7 +440,7 @@
     <div id="alert-confirm-modal" class="modal-base">
         <div class="modal-content bg-slate-900 rounded-lg border border-slate-700 text-center max-w-md">
             <h3 id="alert-confirm-title" class="text-xl font-bold mb-4 text-yellow-300"></h3>
-            <p id="alert-confirm-message" class="text-slate-300 mb-6"></p>
+            <p id="alert-confirm-message" class="text-slate-300 mb-6 whitespace-pre-wrap"></p>
             <div id="alert-confirm-buttons" class="flex justify-center gap-4"></div>
         </div>
     </div>
@@ -601,6 +609,7 @@
             openModal(dom.alertConfirmModalEl);
         };
 
+        // MODIFIED: To support single-button (notice) modals
         const showConfirm = (message, onConfirm, title = '확인', options = {}) => {
             const {
                 onCancel = () => {},
@@ -612,14 +621,18 @@
 
             dom.alertConfirmTitle.textContent = title;
             dom.alertConfirmMessage.textContent = message;
+            
+            const cancelBtnHTML = cancelText ? `<button class="modal-cancel-btn ${cancelClass} text-white font-bold py-2 px-6 rounded-lg">${cancelText}</button>` : '';
             dom.alertConfirmButtons.innerHTML = `
-                <button class="modal-cancel-btn ${cancelClass} text-white font-bold py-2 px-6 rounded-lg">${cancelText}</button>
+                ${cancelBtnHTML}
                 <button class="modal-ok-btn ${okClass} text-white font-bold py-2 px-6 rounded-lg">${okText}</button>
             `;
             openModal(dom.alertConfirmModalEl);
             
             dom.alertConfirmModalEl.querySelector('.modal-ok-btn').onclick = () => { closeModal(dom.alertConfirmModalEl); onConfirm(); };
-            dom.alertConfirmModalEl.querySelector('.modal-cancel-btn').onclick = () => { closeModal(dom.alertConfirmModalEl); onCancel(); };
+            if (cancelText) {
+                dom.alertConfirmModalEl.querySelector('.modal-cancel-btn').onclick = () => { closeModal(dom.alertConfirmModalEl); onCancel(); };
+            }
         };
 
         const updateFullscreenIcons = () => {
@@ -702,27 +715,48 @@
             dom.proceedToGuideBtn.classList.remove('hidden');
         };
 
+        // MODIFIED: Show warning modal first, then proceed
         const selectRole = (roleId) => {
             appData.state.selectedRole = roleId;
-            const role = appData.roles[roleId];
-            dom.roleTitle.innerText = `[${role.name}]`;
             
-            const roleInfoList = role.info.map(fact => `<div class="bg-slate-700 p-3 rounded break-keep">- ${fact}</div>`).join('');
-            const itemsList = appData.items.map(item => `
-                <div class="bg-slate-700 p-3 rounded">
-                    <p class="font-bold">${item.icon} ${item.name}</p>
-                    <p class="text-sm text-slate-400 mt-1 break-keep">${item.description}</p>
-                </div>
-            `).join('');
+            showConfirm(
+                "선택한 역할의 지식은 생존에 대한 단편적인 정보일 뿐입니다.\n\n특정 물품이 언급되었다고 해서 반드시 높은 순위인 것은 아니며, 오히려 낮은 순위일 수도 있습니다.\n\n어떤 역할을 선택하든 전문가의 정답 순위는 바뀌지 않습니다. 전체 상황을 종합적으로 고려하여 신중하게 판단하세요.",
+                () => { // onConfirm callback
+                    const role = appData.roles[roleId];
+                    dom.roleTitle.innerText = `[${role.name}]`;
+                    
+                    const roleInfoList = role.info.map(fact => `<div class="bg-slate-700 p-3 rounded break-keep">- ${fact}</div>`).join('');
+                    const itemsList = appData.items.map(item => `
+                        <div class="bg-slate-700 p-3 rounded">
+                            <p class="font-bold">${item.icon} ${item.name}</p>
+                            <p class="text-sm text-slate-400 mt-1 break-keep">${item.description}</p>
+                        </div>
+                    `).join('');
 
-            dom.knowledgeList.innerHTML = `
-                <h4 class="text-lg font-bold text-amber-300 md:col-span-2">🧠 나의 정보</h4>
-                ${roleInfoList}
-                <hr class="border-slate-600 my-2 md:col-span-2">
-                <h4 class="text-lg font-bold text-cyan-300 md:col-span-2">🎒 전체 물품 정보</h4>
-                ${itemsList}
-            `;
-            showScreen('knowledge-screen');
+                    // ADDED: Warning for the knowledge screen
+                    const knowledgeScreenWarning = `
+                        <div class="mb-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-300 text-xs text-center break-keep md:col-span-2">
+                            <p><b>▲ 중요:</b> 역할 지식은 생존에 대한 <b>단편적인 정보</b>일 뿐이며, 특정 물품의 높은 우선순위를 암시하는 것이 아닙니다. 전체 상황을 고려하여 판단하세요.</p>
+                        </div>
+                    `;
+
+                    dom.knowledgeList.innerHTML = `
+                        ${knowledgeScreenWarning}
+                        <h4 class="text-lg font-bold text-amber-300 md:col-span-2">🧠 나의 정보</h4>
+                        ${roleInfoList}
+                        <hr class="border-slate-600 my-2 md:col-span-2">
+                        <h4 class="text-lg font-bold text-cyan-300 md:col-span-2">🎒 전체 물품 정보</h4>
+                        ${itemsList}
+                    `;
+                    showScreen('knowledge-screen');
+                },
+                '▲ 중요 안내',
+                {
+                    okText: '확인',
+                    cancelText: null, // Pass null to hide cancel button
+                    okClass: 'bg-emerald-600 hover:bg-emerald-700'
+                }
+            );
         };
         
         const updateFinishButtonState = (type) => {
@@ -855,10 +889,17 @@
             showScreen('report-screen');
         };
 
+        // MODIFIED: Added warning message to the modal
         const openKnowledgeModal = () => {
             if (!appData.state.selectedRole) return;
             const role = appData.roles[appData.state.selectedRole];
             
+            const warningHTML = `
+                <div class="mb-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-300 text-sm break-keep">
+                    <p><b>▲ 중요:</b> 역할 지식은 생존에 대한 <b>단편적인 정보</b>일 뿐이며, 특정 물품의 높은 우선순위를 암시하는 것이 아닙니다. 전체 상황을 고려하여 판단하세요.</p>
+                </div>
+            `;
+
             const roleInfoList = role.info.map(fact => `<div class="bg-slate-700 p-3 rounded break-keep">- ${fact}</div>`).join('');
             const itemsList = appData.items.map(item => `
                 <div class="bg-slate-700 p-3 rounded">
@@ -870,6 +911,7 @@
             dom.knowledgeModalBodyEl.innerHTML = `
                 <h3 class="text-2xl font-bold mb-4 text-center">정보 다시보기</h3>
                 <div class="max-h-[60vh] overflow-y-auto p-2 space-y-4">
+                    ${warningHTML}
                     <div>
                         <h4 class="text-lg font-bold text-amber-300 mb-2">🧠 [${role.name}] 나의 정보</h4>
                         <div class="space-y-2">${roleInfoList}</div>
@@ -891,8 +933,8 @@
                 
                 const savedState = JSON.parse(savedStateJSON);
                  if (savedState.version !== APP_VERSION) {
-                     localStorage.removeItem(SAVE_KEY);
-                     return false;
+                      localStorage.removeItem(SAVE_KEY);
+                      return false;
                  }
 
                 appData.state = savedState;
