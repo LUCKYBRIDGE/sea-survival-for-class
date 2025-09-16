@@ -18,7 +18,6 @@
             overscroll-behavior-y: contain;
             height: 100%;
             width: 100%;
-            overflow: hidden;
             background-color: #030712;
         }
         body {
@@ -30,15 +29,24 @@
             width: 100%;
             height: 100%;
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* Cut off issue fix: Align content to the top */
             justify-content: center;
             overflow-y: auto;
+            padding-top: 3rem; /* Cut off issue fix: Add padding for spacing */
+            padding-bottom: 3rem; /* Cut off issue fix: Add padding for spacing */
         }
         #app-container {
              background-color: rgba(15, 23, 42, 0.85); /* slate-900 with opacity */
         }
         .screen { display: none; }
         .active-screen { display: block; }
+
+        /* 지식 브리핑 화면이 flex 레이아웃을 사용하도록 수정 */
+        #knowledge-screen.active-screen {
+            display: flex;
+            flex-direction: column;
+        }
+
         .drag-handle {
             cursor: grab;
             padding: 0.5rem;
@@ -233,10 +241,10 @@
             </div>
             
             <!-- Screen 3: Knowledge Briefing -->
-            <div id="knowledge-screen" class="screen">
+            <div id="knowledge-screen" class="screen" style="height: 80vh;">
                 <h2 class="text-2xl sm:text-3xl font-bold text-center mb-2">지식 브리핑</h2>
                 <p id="role-title" class="text-center text-amber-400 font-bold text-lg mb-6"></p>
-                <div id="knowledge-list" class="bg-slate-800 p-4 sm:p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 max-h-[60vh] sm:max-h-[65vh] overflow-y-auto">
+                <div id="knowledge-list" class="bg-slate-800 p-4 sm:p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 flex-1 overflow-y-auto">
                     <!-- Knowledge items will be injected here by JS -->
                 </div>
                 <div class="text-center mt-8">
@@ -268,7 +276,7 @@
                 </div>
                  <div class="text-center mt-8">
                      <button id="finish-individual-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                           개인 순위 제출하기 <span id="finish-individual-button-counter">(0/15)</span>
+                         개인 순위 제출하기 <span id="finish-individual-button-counter">(0/15)</span>
                      </button>
                  </div>
             </div>
@@ -325,7 +333,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                     <h2 class="text-2xl sm:text-3xl font-bold text-center flex-grow">[모둠] 생존 물품 우선순위 정하기</h2>
                      <button id="open-knowledge-modal-btn-group" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm flex-shrink-0">
-                           내 정보 다시보기 🧠
+                         내 정보 다시보기 🧠
                      </button>
                 </div>
                 <!-- ADDED: Tip box for group ranking -->
@@ -337,7 +345,7 @@
                 </div>
                  <div class="text-center mt-8">
                      <button id="finish-group-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                           최종 보고서 만들기 <span id="finish-group-button-counter">(0/15)</span>
+                         최종 보고서 만들기 <span id="finish-group-button-counter">(0/15)</span>
                      </button>
                  </div>
             </div>
@@ -361,18 +369,15 @@
                             <span id="final-role" class="font-bold text-amber-400"></span>
                         </div>
                     </div>
-                     <div id="score-summary-container" class="bg-slate-900/50 p-4 rounded-lg">
-                             <!-- Score and evaluation will be injected here -->
-                    </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                         <!-- Individual Report -->
-                        <div class="bg-slate-900/50 p-4 rounded-lg flex flex-col">
+                        <div class="bg-slate-900/50 p-4 rounded-lg flex flex-col transition-all">
                             <h3 class="text-xl font-bold text-center mb-4 text-yellow-300">나의 생존 계획</h3>
                             <div id="individual-score-summary" class="text-center mb-4"></div>
                             <div id="individual-final-list" class="space-y-2 flex-grow overflow-y-auto bg-slate-800 p-3 rounded-md max-h-[45vh] lg:max-h-[50vh]"></div>
                         </div>
                         <!-- Group Report -->
-                         <div class="bg-slate-900/50 p-4 rounded-lg flex flex-col">
+                         <div class="bg-slate-900/50 p-4 rounded-lg flex flex-col transition-all">
                             <h3 class="text-xl font-bold text-center mb-4 text-teal-300">우리 모둠의 생존 계획</h3>
                             <div id="group-score-summary" class="text-center mb-4"></div>
                             <div id="group-final-list" class="space-y-2 flex-grow overflow-y-auto bg-slate-800 p-3 rounded-md max-h-[45vh] lg:max-h-[50vh]"></div>
@@ -381,9 +386,9 @@
                 </div>
                  <div class="text-center mt-6 flex flex-col sm:flex-row sm:justify-center gap-2 sm:gap-4">
                      <button id="open-save-share-modal-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
-                           결과 저장하기
+                         결과 저장하기
                      </button>
-                    <a href="https://pinkylucky.tistory.com/8" target="_blank" rel="noopener noreferrer" class="inline-block w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition">
+                    <a href="https://blog.naver.com/pinkylucky7/223980374740" target="_blank" rel="noopener noreferrer" class="inline-block w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition">
                         전문가 해설 보기
                     </a>
                     <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
@@ -507,10 +512,10 @@
                 "반드시... 반드시 살아남아라!"
             ],
             roles: {
-                influencer: { name: '💅 SNS 인플루언서', imageUrl: 'https://i.imgur.com/8aQ1q0f.png', description: "어떤 상황에서도 '좋아요'를 부르는 감각을 가졌습니다.", info: [ "반짝이는 물건으로 햇빛을 반사시키면, 아주 멀리 있는 사람의 시선도 사로잡을 수 있다.", "탈수는 피부 노화의 지름길이다.", "단 음식은 우울한 기분을 잠시나마 달래주는 효과가 있다.", "강한 햇볕을 직접 쬐는 것은 탈수를 가속시키므로, 그늘을 만들어 몸을 보호하는 것이 중요하다.", "어떤 상황에서든 '스토리'가 있는 아이템이 주목받는다.", "요즘은 바다 한가운데서도 라이브 방송을 하는 게 트렌드다." ] },
-                trainer: { name: '💪 헬스 트레이너', imageUrl: 'https://i.imgur.com/nJ3zVqM.png', description: "인체의 한계와 신체 능력 유지에 대한 지식이 있습니다.", info: [ "알코올은 피부 근처의 혈관을 확장시켜, 몸의 열을 바깥으로 더 빨리 빠져나가게 만든다.", "몸이 젖어 있으면, 마른 상태일 때보다 체온이 20배 이상 빠르게 떨어질 수 있다.", "가만히 있어도 우리 몸의 수분은 계속해서 빠져나간다.", "설탕은 에너지를 빨리 내게 하지만, 효과가 오래가지는 않는다.", "상처가 바닷물에 노출되면 감염 위험이 매우 크다.", "장기간의 수영은 심폐지구력 향상에 최고의 운동이다." ] },
-                angler: { name: '🎣 낚시광', imageUrl: 'https://i.imgur.com/3YxH8Gq.png', description: "바다와 물고기에 대한 풍부한 실전 경험을 가졌습니다.", info: [ "아주 작은 물고기라도 잡을 수 있다면, 그것을 미끼로 사용해 더 큰 고기를 노려볼 수 있다.", "바다에 강한 냄새를 풍기면, 멀리 있는 물고기들을 주변으로 유인하는 효과가 있다.", "대부분의 어류 체액은 바닷물보다 염도가 낮다.", "상어는 피 냄새뿐만 아니라, 물속의 부자연스러운 진동에도 매우 민감하게 반응한다.", "바다에서는 작은 부유물이라도 주변에 물고기들이 모여들기 마련이다.", "전설적인 '청새치'는 자동차보다도 빠르게 헤엄칠 수 있다." ] },
-                diy: { name: '🛠️ DIY 취미가', imageUrl: 'https://i.imgur.com/1Bw7d2C.png', description: "주어진 도구로 무엇이든 만들어내는 손재주가 있습니다.", info: [ "렌즈를 이용해 햇빛을 한 점으로 모으면, 그 지점은 종이를 태울 만큼 뜨거워질 수 있다.", "간단한 전자제품을 분해하면, 낚싯바늘이나 작은 도구로 쓸만한 예상치 못한 부품을 얻을 수 있다.", "나일론 같은 합성 밧줄은 열을 가하면 녹는 성질이 있어, 올이 풀리는 것을 막는 데 쓸 수 있다.", "대부분의 플라스틱과 기름은 물보다 밀도가 낮다.", "모든 재료는 분해하고 다시 조립할 수 있다.", "잘 만든 연은 1,000미터 이상까지도 날릴 수 있다." ] }
+                influencer: { name: '💅 SNS 인플루언서', imageUrl: 'influencer.png', description: "어떤 상황에서도 '좋아요'를 부르는 감각을 가졌습니다.", info: [ "반짝이는 물건으로 햇빛을 반사시키면, 아주 멀리 있는 사람의 시선도 사로잡을 수 있다.", "탈수는 피부 노화의 지름길이다.", "단 음식은 우울한 기분을 잠시나마 달래주는 효과가 있다.", "강한 햇볕을 직접 쬐는 것은 탈수를 가속시키므로, 그늘을 만들어 몸을 보호하는 것이 중요하다.", "어떤 상황에서든 '스토리'가 있는 아이템이 주목받는다.", "요즘은 바다 한가운데서도 라이브 방송을 하는 게 트렌드다." ] },
+                trainer: { name: '💪 헬스 트레이너', imageUrl: 'trainer.png', description: "인체의 한계와 신체 능력 유지에 대한 지식이 있습니다.", info: [ "알코올은 피부 근처의 혈관을 확장시켜, 몸의 열을 바깥으로 더 빨리 빠져나가게 만든다.", "몸이 젖어 있으면, 마른 상태일 때보다 체온이 20배 이상 빠르게 떨어질 수 있다.", "가만히 있어도 우리 몸의 수분은 계속해서 빠져나간다.", "설탕은 에너지를 빨리 내게 하지만, 효과가 오래가지는 않는다.", "상처가 바닷물에 노출되면 감염 위험이 매우 크다.", "장기간의 수영은 심폐지구력 향상에 최고의 운동이다." ] },
+                angler: { name: '🎣 낚시광', imageUrl: 'angler.png', description: "바다와 물고기에 대한 풍부한 실전 경험을 가졌습니다.", info: [ "아주 작은 물고기라도 잡을 수 있다면, 그것을 미끼로 사용해 더 큰 고기를 노려볼 수 있다.", "바다에 강한 냄새를 풍기면, 멀리 있는 물고기들을 주변으로 유인하는 효과가 있다.", "대부분의 어류 체액은 바닷물보다 염도가 낮다.", "상어는 피 냄새뿐만 아니라, 물속의 부자연스러운 진동에도 매우 민감하게 반응한다.", "바다에서는 작은 부유물이라도 주변에 물고기들이 모여들기 마련이다.", "전설적인 '청새치'는 자동차보다도 빠르게 헤엄칠 수 있다." ] },
+                diy: { name: '🛠️ DIY 취미가', imageUrl: 'diy.png', description: "주어진 도구로 무엇이든 만들어내는 손재주가 있습니다.", info: [ "렌즈를 이용해 햇빛을 한 점으로 모으면, 그 지점은 종이를 태울 만큼 뜨거워질 수 있다.", "간단한 전자제품을 분해하면, 낚싯바늘이나 작은 도구로 쓸만한 예상치 못한 부품을 얻을 수 있다.", "나일론 같은 합성 밧줄은 열을 가하면 녹는 성질이 있어, 올이 풀리는 것을 막는 데 쓸 수 있다.", "대부분의 플라스틱과 기름은 물보다 밀도가 낮다.", "모든 재료는 분해하고 다시 조립할 수 있다.", "잘 만든 연은 1,000미터 이상까지도 날릴 수 있다." ] }
             },
             items: [
                 { id: 1, name: '항해용 각도기', uscgRank: 15, icon: '🧭', description: '별의 각도를 재어 위치를 계산하는 항해용 전문 도구입니다.' },
@@ -533,6 +538,7 @@
         };
 
         const dom = {
+            appWrapper: document.getElementById('app-wrapper'),
             appContainer: document.getElementById('app-container'),
             rankListEl: document.getElementById('rank-list'),
             groupRankListEl: document.getElementById('group-rank-list'),
@@ -565,7 +571,6 @@
             finalStudentNumber: document.getElementById('final-student-number'),
             finalStudentName: document.getElementById('final-student-name'),
             finalRole: document.getElementById('final-role'),
-            scoreSummaryContainer: document.getElementById('score-summary-container'),
             individualScoreSummary: document.getElementById('individual-score-summary'),
             groupScoreSummary: document.getElementById('group-score-summary'),
             individualFinalList: document.getElementById('individual-final-list'),
@@ -642,6 +647,17 @@
                 const isIntro = ['welcome-screen', 'setup-screen'].includes(screenId);
                 [dom.backToStartBtn, dom.exitAppBtn].forEach(btn => btn.classList.toggle('hidden', isIntro));
             }
+            
+            // 화면 전환 시 스크롤 위치를 맨 위로 초기화
+            dom.appWrapper.scrollTop = 0; // 메인 스크롤 초기화
+            if (activeScreen) {
+                // 화면 내부의 스크롤 가능 영역도 초기화
+                const scrollableChild = activeScreen.querySelector('.overflow-y-auto');
+                if (scrollableChild) {
+                    scrollableChild.scrollTop = 0;
+                }
+            }
+            
             appData.state.currentScreen = screenId;
             if (!['welcome-screen', 'setup-screen', 'emergency-screen'].includes(screenId)) saveState();
         };
@@ -721,7 +737,7 @@
         const showEmergencySequence = () => {
             showScreen('emergency-screen');
             if (dom.bgMusic) {
-                dom.bgMusic.src = 'https://actions.google.com/sounds/v1/ambiences/seastorm.ogg';
+                dom.bgMusic.src = 'seastorm.mp3';
                 dom.bgMusic.play().catch(e => console.log("음악 자동 재생이 차단되었습니다.", e));
             }
             dom.emergencyMessageContainer.innerHTML = '';
@@ -872,8 +888,14 @@
             dom.finalStudentName.textContent = appData.state.studentName;
             dom.finalStudentNumber.textContent = appData.state.studentNumber;
             dom.finalRole.textContent = (appData.state.selectedRole && appData.roles[appData.state.selectedRole]?.name) || '미정';
-            
-            let groupTotalScore = 0;
+
+            const getScoreCategory = (score) => {
+                if (score <= 25) return { img: 'score_excellent.png', class: 'border-emerald-400' };
+                if (score <= 32) return { img: 'score_good.png', class: 'border-sky-400' };
+                if (score <= 45) return { img: 'score_average.png', class: 'border-yellow-400' };
+                if (score <= 55) return { img: 'score_danger.png', class: 'border-amber-500' };
+                return { img: 'score_failure.png', class: 'border-red-500' };
+            };
 
             const calculateScoreAndRenderList = (type) => {
                 const rankedItems = type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems;
@@ -959,24 +981,27 @@
                 else if (totalScore <= 55) { evaluation = '위험합니다! 상어가 친구하자고 할지도...'; }
                 else { evaluation = '이런... 바다거북이와 대화하게 될지도 모릅니다.'; }
                 
-                summaryEl.innerHTML = `<p class="text-lg font-bold">총점: <span class="text-red-400">${totalScore}점</span> ${modeDescription}</p><p class="text-base mt-1">"${evaluation}"</p>`;
-                if(type === 'group') groupTotalScore = totalScore;
+                const category = getScoreCategory(totalScore);
+                const parentContainer = summaryEl.parentElement;
+
+                if (parentContainer) {
+                    parentContainer.className = parentContainer.className.replace(/border-(emerald|sky|yellow|amber|red)-400/g, '').trim();
+                    parentContainer.classList.add('border-2', category.class);
+                }
+
+                summaryEl.innerHTML = `
+                    <div class="flex flex-col items-center gap-3">
+                        <img src="${category.img}" alt="결과 이미지" class="w-24 h-24 object-cover rounded-lg bg-slate-700" onerror="this.onerror=null;this.src='https://placehold.co/96x96/1e293b/94a3b8?text=Error';">
+                        <div class="text-center">
+                            <p class="text-lg font-bold">총점: <span class="text-red-400">${totalScore}점</span> ${modeDescription}</p>
+                            <p class="text-sm mt-1 text-slate-300">"${evaluation}"</p>
+                        </div>
+                    </div>`;
             };
 
             calculateScoreAndRenderList('individual');
             calculateScoreAndRenderList('group');
             
-            let resultImage = '';
-            let resultClass = '';
-            if (groupTotalScore <= 25) { resultClass = 'border-emerald-400'; resultImage = 'https://i.imgur.com/vU1nL5p.png'; } 
-            else if (groupTotalScore <= 32) { resultClass = 'border-sky-400'; resultImage = 'https://i.imgur.com/gYjWT8k.png'; } 
-            else if (groupTotalScore <= 45) { resultClass = 'border-yellow-400'; resultImage = 'https://i.imgur.com/J3yqH0H.png'; } 
-            else if (groupTotalScore <= 55) { resultClass = 'border-amber-500'; resultImage = 'https://i.imgur.com/bWq3e5d.png'; } 
-            else { resultClass = 'border-red-500'; resultImage = 'https://i.imgur.com/F3bF3c6.png'; }
-
-            dom.scoreSummaryContainer.innerHTML = `<div class="flex flex-col md:flex-row items-center gap-4"><div class="w-32 h-32 md:w-40 md:h-40 flex-shrink-0"><img id="result-image" src="${resultImage}" alt="결과 이미지" class="w-full h-full object-cover rounded-lg bg-slate-700" onerror="this.onerror=null;this.src='https://placehold.co/160x160/1e293b/94a3b8?text=Image+Error';"></div><div class="text-center md:text-left"><p class="text-xl sm:text-2xl font-bold">모둠 총점: <span class="text-red-400">${groupTotalScore}점</span></p><p class="text-slate-400 text-sm">(낮을수록 생존 확률이 높습니다)</p></div></div>`;
-            dom.scoreSummaryContainer.className = `p-4 rounded-lg border-2 transition-colors duration-500 ${resultClass}`;
-
             showScreen('report-screen');
         };
 
@@ -997,8 +1022,8 @@
                 
                 const savedState = JSON.parse(savedStateJSON);
                  if (savedState.version !== APP_VERSION) {
-                      localStorage.removeItem(SAVE_KEY);
-                      return false;
+                       localStorage.removeItem(SAVE_KEY);
+                       return false;
                  }
 
                 appData.state = savedState;
