@@ -681,9 +681,7 @@
 
         // Role Understanding Modal Function
         const openRoleUnderstandingModal = () => {
-            console.log('openRoleUnderstandingModal called');
             const modal = document.getElementById('role-understanding-modal');
-            console.log('Modal element:', modal);
             if (!modal) {
                 console.error('Role understanding modal not found');
                 // Fallback to proceed directly if modal not found
@@ -786,8 +784,12 @@
             window.location.reload();
         };
         
-        const openModal = (modalEl) => modalEl.classList.add('show');
-        const closeModal = (modalEl) => modalEl.classList.remove('show');
+        const openModal = (modalEl) => {
+            modalEl.classList.remove('hidden');
+        };
+        const closeModal = (modalEl) => {
+            modalEl.classList.add('hidden');
+        };
 
         const showAlert = (message, title = '알림') => {
             dom.alertConfirmTitle.textContent = title;
@@ -900,7 +902,6 @@
         };
 
         const selectRole = (roleId) => {
-            console.log('selectRole called with:', roleId);
             appData.state.selectedRole = roleId;
             openRoleUnderstandingModal();
         };
@@ -1228,10 +1229,8 @@
         };
 
         const handleBodyClick = (event) => {
-            console.log('handleBodyClick fired, target:', event.target);
             const target = event.target;
             const roleCard = target.closest('.role-card');
-            console.log('roleCard found:', roleCard);
             const emptySlot = target.closest('.rank-slot.empty');
             const infoButton = target.closest('[data-info-id]');
             const clearButton = target.closest('[data-clear-slot]');
@@ -1325,7 +1324,6 @@
             if (actions[target.id]) {
                 actions[target.id]();
             } else if (roleCard) {
-                console.log('Role card clicked:', roleCard.dataset.role);
                 selectRole(roleCard.dataset.role);
             } else if (emptySlot) {
                 openItemSelectionModal(parseInt(emptySlot.dataset.slotIndex, 10), emptySlot.dataset.rankType);
