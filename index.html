@@ -1230,6 +1230,7 @@
 
         const handleBodyClick = (event) => {
             const target = event.target;
+            console.log('Button clicked:', target.id);
             const roleCard = target.closest('.role-card');
             const emptySlot = target.closest('.rank-slot.empty');
             const infoButton = target.closest('[data-info-id]');
@@ -1322,6 +1323,7 @@
             };
 
             if (actions[target.id]) {
+                console.log('Executing action for:', target.id);
                 actions[target.id]();
             } else if (roleCard) {
                 selectRole(roleCard.dataset.role);
