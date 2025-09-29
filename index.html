@@ -638,6 +638,69 @@
             }
         };
 
+        // Role Understanding Modal Function
+        const openRoleUnderstandingModal = () => {
+            const modal = document.getElementById('role-understanding-modal');
+            const checkboxes = modal.querySelectorAll('.understanding-check');
+            const checkBtn = document.getElementById('check-understanding-btn');
+            const feedback = document.getElementById('understanding-feedback');
+            const correctCount = document.getElementById('correct-count');
+
+            // Reset checkboxes
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                cb.parentElement.classList.remove('bg-red-900/30', 'bg-green-900/30');
+            });
+
+            // Reset button
+            checkBtn.textContent = '다시 확인해주세요';
+            checkBtn.className = 'bg-gray-500 text-white font-bold py-2 px-8 rounded-lg cursor-not-allowed';
+            checkBtn.disabled = true;
+
+            // Update counter
+            const updateCounter = () => {
+                const correctlyChecked = Array.from(checkboxes).filter(cb => {
+                    const isCorrect = cb.dataset.correct === 'true';
+                    return (isCorrect && cb.checked) || (!isCorrect && !cb.checked);
+                }).length;
+
+                correctCount.textContent = Math.max(0, correctlyChecked - 2); // Only count correct selections
+
+                if (correctlyChecked === 4) {
+                    checkBtn.textContent = '이해했습니다! ✅';
+                    checkBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-8 rounded-lg transition-all transform hover:scale-105';
+                    checkBtn.disabled = false;
+                    feedback.innerHTML = '<p class="text-green-400 font-bold">🎉 완벽하게 이해하셨습니다!</p>';
+                } else {
+                    checkBtn.textContent = '다시 확인해주세요';
+                    checkBtn.className = 'bg-gray-500 text-white font-bold py-2 px-8 rounded-lg cursor-not-allowed';
+                    checkBtn.disabled = true;
+                    feedback.innerHTML = `<p class="text-slate-400 text-sm">정답 선택: <span id="correct-count">${Math.max(0, correctlyChecked - 2)}</span>/2</p>`;
+                }
+            };
+
+            // Add listeners
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const isCorrect = cb.dataset.correct === 'true';
+                    if (cb.checked) {
+                        if (isCorrect) {
+                            cb.parentElement.classList.add('bg-green-900/30');
+                            cb.parentElement.classList.remove('bg-red-900/30');
+                        } else {
+                            cb.parentElement.classList.add('bg-red-900/30');
+                            cb.parentElement.classList.remove('bg-green-900/30');
+                        }
+                    } else {
+                        cb.parentElement.classList.remove('bg-red-900/30', 'bg-green-900/30');
+                    }
+                    updateCounter();
+                });
+            });
+
+            openModal(modal);
+        };
+
         const showScreen = (screenId) => {
             if (screenId !== 'emergency-screen') {
                 stopMusicAndClear();
@@ -789,24 +852,22 @@
 
         const selectRole = (roleId) => {
             appData.state.selectedRole = roleId;
-            
-            showConfirm(
-                "선택한 역할의 지식은 생존에 대한 단편적인 정보일 뿐입니다.\n\n특정 물품이 언급되었다고 해서 반드시 높은 순위인 것은 아니며, 오히려 낮은 순위일 수도 있습니다.\n\n어떤 역할을 선택하든 전문가의 정답 순위는 바뀌지 않습니다. 전체 상황을 종합적으로 고려하여 신중하게 판단하세요.",
-                () => {
-                    const role = appData.roles[roleId];
-                    dom.roleTitle.innerText = `[${role.name}]`;
-                    const roleInfoList = role.info.map(fact => `<div class="bg-slate-700 p-3 rounded break-keep">- ${fact}</div>`).join('');
-                    const itemsList = appData.items.map(item => `
-                        <div class="bg-slate-700 p-3 rounded">
-                            <p class="font-bold">${item.icon} ${item.name}</p>
-                            <p class="text-sm text-slate-400 mt-1 break-keep">${item.description}</p>
-                        </div>`).join('');
-                    const knowledgeScreenWarning = `<div class="mb-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-300 text-xs text-center break-keep md:col-span-2"><p><b>▲ 중요:</b> 역할 지식은 생존에 대한 <b>단편적인 정보</b>일 뿐이며, 특정 물품의 높은 우선순위를 암시하는 것이 아닙니다. 전체 상황을 고려하여 판단하세요.</p></div>`;
-                    dom.knowledgeList.innerHTML = `${knowledgeScreenWarning}<h4 class="text-lg font-bold text-amber-300 md:col-span-2">🧠 나의 정보</h4>${roleInfoList}<hr class="border-slate-600 my-2 md:col-span-2"><h4 class="text-lg font-bold text-cyan-300 md:col-span-2">🎒 전체 물품 정보</h4>${itemsList}`;
-                    showScreen('knowledge-screen');
-                },
-                '▲ 중요 안내', { okText: '확인', cancelText: null, okClass: 'bg-emerald-600 hover:bg-emerald-700' }
-            );
+            openRoleUnderstandingModal();
+        };
+
+        const proceedToKnowledgeScreen = () => {
+            const roleId = appData.state.selectedRole;
+            const role = appData.roles[roleId];
+            dom.roleTitle.innerText = `[${role.name}]`;
+            const roleInfoList = role.info.map(fact => `<div class="bg-slate-700 p-3 rounded break-keep">- ${fact}</div>`).join('');
+            const itemsList = appData.items.map(item => `
+                <div class="bg-slate-700 p-3 rounded">
+                    <p class="font-bold">${item.icon} ${item.name}</p>
+                    <p class="text-sm text-slate-400 mt-1 break-keep">${item.description}</p>
+                </div>`).join('');
+            const knowledgeScreenWarning = `<div class="mb-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-300 text-xs text-center break-keep md:col-span-2"><p><b>▲ 중요:</b> 역할 지식은 생존에 대한 <b>단편적인 정보</b>일 뿐이며, 특정 물품의 높은 우선순위를 암시하는 것이 아닙니다. 전체 상황을 고려하여 판단하세요.</p></div>`;
+            dom.knowledgeList.innerHTML = `${knowledgeScreenWarning}<h4 class="text-lg font-bold text-amber-300 md:col-span-2">🧠 나의 정보</h4>${roleInfoList}<hr class="border-slate-600 my-2 md:col-span-2"><h4 class="text-lg font-bold text-cyan-300 md:col-span-2">🎒 전체 물품 정보</h4>${itemsList}`;
+            showScreen('knowledge-screen');
         };
         
         const updateFinishButtonState = (type) => {
@@ -1243,6 +1304,21 @@
             dom.fullscreenBtn.addEventListener('click', toggleFullScreen);
             document.addEventListener('fullscreenchange', updateFullscreenIcons);
             document.body.addEventListener('click', handleBodyClick);
+
+            // Role understanding modal button handler
+            document.getElementById('check-understanding-btn').addEventListener('click', () => {
+                const modal = document.getElementById('role-understanding-modal');
+                const checkboxes = modal.querySelectorAll('.understanding-check');
+                const correctlyChecked = Array.from(checkboxes).filter(cb => {
+                    const isCorrect = cb.dataset.correct === 'true';
+                    return (isCorrect && cb.checked) || (!isCorrect && !cb.checked);
+                }).length;
+
+                if (correctlyChecked === 4) {
+                    closeModal(modal);
+                    proceedToKnowledgeScreen();
+                }
+            });
             
             ['groupNameInput', 'studentNameInput', 'studentNumberInput'].forEach(id => {
                 dom[id].addEventListener('input', () => { appData.state[id.replace('Input','')] = dom[id].value; });
