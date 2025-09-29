@@ -801,6 +801,7 @@
         };
 
         const showConfirm = (message, onConfirm, title = '확인', options = {}) => {
+            console.log('showConfirm called with:', { message, title });
             const {
                 onCancel = () => {},
                 okText = '확인',
@@ -809,6 +810,7 @@
                 cancelClass = 'bg-gray-500 hover:bg-gray-600'
             } = options;
 
+            console.log('dom.alertConfirmModalEl:', dom.alertConfirmModalEl);
             dom.alertConfirmTitle.textContent = title;
             dom.alertConfirmMessage.textContent = message;
             
@@ -1413,8 +1415,12 @@
             window.addEventListener('beforeunload', saveState);
             document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(); });
         };
-        
-        initialize();
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initialize);
+        } else {
+            initialize();
+        }
     })();
     </script>
 </body>
