@@ -749,6 +749,7 @@
         };
 
         const showScreen = (screenId) => {
+            console.log('showScreen called with:', screenId);
             if (screenId !== 'emergency-screen') {
                 stopMusicAndClear();
             }
@@ -756,6 +757,7 @@
             dom.emergencyScreen.style.display = 'none';
 
             const activeScreen = document.getElementById(screenId);
+            console.log('Active screen found:', activeScreen);
             if (screenId === 'emergency-screen') {
                 dom.emergencyScreen.style.display = 'flex';
                 [dom.backToStartBtn, dom.exitAppBtn].forEach(btn => btn.classList.add('hidden'));
@@ -1285,9 +1287,18 @@
 
             const actions = {
                 'start-class-btn': () => {
-                    if (localStorage.getItem(SAVE_KEY)) {
+                    console.log('start-class-btn action triggered');
+                    const savedData = localStorage.getItem(SAVE_KEY);
+                    console.log('Saved data exists:', !!savedData);
+                    if (savedData) {
+                        console.log('Showing confirm dialog');
                         showConfirm('저장된 진행 상황을 이어서 하시겠습니까?', () => { if (!restoreSession()) { showAlert("데이터를 불러오지 못했습니다. 새로 시작합니다.", "오류"); restartApp(); } }, '진행 상황 발견', { onCancel: () => { appData.state = getNewState(); showScreen('setup-screen'); }, okText: '이어하기', cancelText: '새로 시작', okClass: 'bg-green-600 hover:bg-green-700', cancelClass: 'bg-red-600 hover:bg-red-700' });
-                    } else { appData.state = getNewState(); showScreen('setup-screen'); }
+                    } else {
+                        console.log('No saved data, starting new');
+                        appData.state = getNewState();
+                        console.log('Calling showScreen with setup-screen');
+                        showScreen('setup-screen');
+                    }
                 },
                 'start-mission-btn': startMission,
                 'skip-emergency-btn': () => { stopMusicAndClear(); skipEmergencySequence(); },
