@@ -42,10 +42,18 @@
              background-color: rgba(15, 23, 42, 0.85); /* slate-900 with opacity */
         }
         .screen { display: none; }
-        .active-screen { display: block; }
+        .active-screen {
+            display: block;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
 
-        /* 지식 브리핑 화면이 flex 레이아웃을 사용하도록 수정 */
-        #knowledge-screen.active-screen {
+        /* flex 레이아웃을 사용하는 화면들 */
+        #knowledge-screen.active-screen,
+        #main-screen.active-screen,
+        #discussion-guide-screen.active-screen,
+        #group-ranking-screen.active-screen,
+        #report-screen.active-screen {
             display: flex;
             flex-direction: column;
         }
@@ -248,7 +256,7 @@
             </div>
             
             <!-- Screen 3: Knowledge Briefing -->
-            <div id="knowledge-screen" class="screen" style="height: 80vh;">
+            <div id="knowledge-screen" class="screen">
                 <h2 class="text-2xl sm:text-3xl font-bold text-center mb-2">지식 브리핑</h2>
                 <p id="role-title" class="text-center text-amber-400 font-bold text-lg mb-6"></p>
                 <div id="knowledge-list" class="bg-slate-800 p-4 sm:p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 flex-1 overflow-y-auto">
@@ -278,7 +286,7 @@
                 <div class="max-w-3xl mx-auto mb-4 p-3 bg-sky-900/50 border border-sky-700 rounded-lg text-sky-300 text-sm break-keep text-center">
                     <p>💡 <b>내 정보 활용 Tip:</b> 내 정보는 합리적인 결정을 돕는 <b>참고 자료</b>입니다. 언급된 물품이 반드시 정답은 아니므로, 종합적인 판단이 중요합니다.</p>
                 </div>
-                <div id="rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[55vh] space-y-3 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto">
+                <div id="rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[55vh] space-y-3 max-h-[70vh] overflow-y-auto">
                    <!-- Ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
@@ -347,7 +355,7 @@
                 <div class="max-w-3xl mx-auto mb-4 p-3 bg-sky-900/50 border border-sky-700 rounded-lg text-sky-300 text-sm break-keep text-center">
                     <p>💡 <b>토의 Tip:</b> 모둠원의 다양한 전문 지식을 종합하면 더 나은 결정을 내릴 수 있습니다. 적극적으로 의견을 나누고 최선의 순위를 함께 만들어보세요.</p>
                 </div>
-                <div id="group-rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[55vh] space-y-3 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto">
+                <div id="group-rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[55vh] space-y-3 max-h-[70vh] overflow-y-auto">
                     <!-- Group ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
