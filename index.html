@@ -498,6 +498,47 @@
 
     <audio id="bg-music" loop></audio>
 
+    <!-- Role Understanding Modal -->
+    <div id="role-understanding-modal" class="modal fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-content bg-slate-800 text-slate-100 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="border-b border-slate-600 pb-4 mb-4">
+                <h3 class="text-2xl font-bold text-cyan-400">🎯 역할 이해도 확인</h3>
+                <p class="text-slate-300 mt-2">아래 설명 중 <span class="text-emerald-400 font-bold">올바른 것</span>을 모두 선택하세요:</p>
+            </div>
+
+            <div class="space-y-3 mb-6">
+                <label class="block p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+                    <input type="checkbox" class="understanding-check mr-3" data-correct="false">
+                    <span>내가 선택한 역할에 따라 특정 물품의 정답 순위가 바뀐다</span>
+                </label>
+
+                <label class="block p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+                    <input type="checkbox" class="understanding-check mr-3" data-correct="true">
+                    <span>해안경비대 전문가들의 정답은 역할과 관계없이 항상 동일하다</span>
+                </label>
+
+                <label class="block p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+                    <input type="checkbox" class="understanding-check mr-3" data-correct="false">
+                    <span>역할 지식을 보면 정답을 쉽게 알 수 있다</span>
+                </label>
+
+                <label class="block p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+                    <input type="checkbox" class="understanding-check mr-3" data-correct="true">
+                    <span>역할은 단지 다양한 관점을 제공할 뿐이다</span>
+                </label>
+            </div>
+
+            <div class="border-t border-slate-600 pt-4">
+                <div id="understanding-feedback" class="mb-4">
+                    <p class="text-slate-400 text-sm">정답 선택: <span id="correct-count">0</span>/2</p>
+                </div>
+                <button id="check-understanding-btn" class="bg-gray-500 text-white font-bold py-2 px-8 rounded-lg cursor-not-allowed" disabled>
+                    다시 확인해주세요
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
     (function() {
         // --- App State and Data ---
@@ -641,6 +682,12 @@
         // Role Understanding Modal Function
         const openRoleUnderstandingModal = () => {
             const modal = document.getElementById('role-understanding-modal');
+            if (!modal) {
+                console.error('Role understanding modal not found');
+                // Fallback to proceed directly if modal not found
+                proceedToKnowledgeScreen();
+                return;
+            }
             const checkboxes = modal.querySelectorAll('.understanding-check');
             const checkBtn = document.getElementById('check-understanding-btn');
             const feedback = document.getElementById('understanding-feedback');
@@ -1353,47 +1400,6 @@
         initialize();
     })();
     </script>
-    <!-- Role Understanding Modal -->
-    <div id="role-understanding-modal" class="modal fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
-        <div class="modal-content bg-slate-800 text-slate-100 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="border-b border-slate-600 pb-4 mb-4">
-                <h3 class="text-2xl font-bold text-cyan-400">🎯 역할 이해도 확인</h3>
-                <p class="text-slate-300 mt-2">아래 설명 중 <span class="text-emerald-400 font-bold">올바른 것</span>을 모두 선택하세요:</p>
-            </div>
-
-            <div class="space-y-3 mb-6">
-                <label class="block p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
-                    <input type="checkbox" class="understanding-check mr-3" data-correct="false">
-                    <span>내가 선택한 역할에 따라 특정 물품의 정답 순위가 바뀐다</span>
-                </label>
-
-                <label class="block p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
-                    <input type="checkbox" class="understanding-check mr-3" data-correct="true">
-                    <span>해안경비대 전문가들의 정답은 역할과 관계없이 항상 동일하다</span>
-                </label>
-
-                <label class="block p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
-                    <input type="checkbox" class="understanding-check mr-3" data-correct="false">
-                    <span>역할 지식을 보면 정답을 쉽게 알 수 있다</span>
-                </label>
-
-                <label class="block p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
-                    <input type="checkbox" class="understanding-check mr-3" data-correct="true">
-                    <span>역할은 단지 다양한 관점을 제공할 뿐이다</span>
-                </label>
-            </div>
-
-            <div class="border-t border-slate-600 pt-4">
-                <div id="understanding-feedback" class="mb-4">
-                    <p class="text-slate-400 text-sm">정답 선택: <span id="correct-count">0</span>/2</p>
-                </div>
-                <button id="check-understanding-btn" class="bg-gray-500 text-white font-bold py-2 px-8 rounded-lg cursor-not-allowed" disabled>
-                    다시 확인해주세요
-                </button>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>
 
