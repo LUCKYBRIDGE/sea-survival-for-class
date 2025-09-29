@@ -749,7 +749,6 @@
         };
 
         const showScreen = (screenId) => {
-            console.log('showScreen called with:', screenId);
             if (screenId !== 'emergency-screen') {
                 stopMusicAndClear();
             }
@@ -757,7 +756,6 @@
             dom.emergencyScreen.style.display = 'none';
 
             const activeScreen = document.getElementById(screenId);
-            console.log('Active screen found:', activeScreen);
             if (screenId === 'emergency-screen') {
                 dom.emergencyScreen.style.display = 'flex';
                 [dom.backToStartBtn, dom.exitAppBtn].forEach(btn => btn.classList.add('hidden'));
@@ -788,9 +786,13 @@
         
         const openModal = (modalEl) => {
             modalEl.classList.remove('hidden');
+            modalEl.classList.add('show');
         };
         const closeModal = (modalEl) => {
-            modalEl.classList.add('hidden');
+            modalEl.classList.remove('show');
+            if (modalEl.classList.contains('modal')) {
+                modalEl.classList.add('hidden');
+            }
         };
 
         const showAlert = (message, title = '알림') => {
@@ -801,7 +803,6 @@
         };
 
         const showConfirm = (message, onConfirm, title = '확인', options = {}) => {
-            console.log('showConfirm called with:', { message, title });
             const {
                 onCancel = () => {},
                 okText = '확인',
@@ -810,7 +811,6 @@
                 cancelClass = 'bg-gray-500 hover:bg-gray-600'
             } = options;
 
-            console.log('dom.alertConfirmModalEl:', dom.alertConfirmModalEl);
             dom.alertConfirmTitle.textContent = title;
             dom.alertConfirmMessage.textContent = message;
             
@@ -1234,7 +1234,6 @@
 
         const handleBodyClick = (event) => {
             const target = event.target;
-            console.log('Button clicked:', target.id);
             const roleCard = target.closest('.role-card');
             const emptySlot = target.closest('.rank-slot.empty');
             const infoButton = target.closest('[data-info-id]');
@@ -1289,16 +1288,10 @@
 
             const actions = {
                 'start-class-btn': () => {
-                    console.log('start-class-btn action triggered');
-                    const savedData = localStorage.getItem(SAVE_KEY);
-                    console.log('Saved data exists:', !!savedData);
-                    if (savedData) {
-                        console.log('Showing confirm dialog');
+                    if (localStorage.getItem(SAVE_KEY)) {
                         showConfirm('저장된 진행 상황을 이어서 하시겠습니까?', () => { if (!restoreSession()) { showAlert("데이터를 불러오지 못했습니다. 새로 시작합니다.", "오류"); restartApp(); } }, '진행 상황 발견', { onCancel: () => { appData.state = getNewState(); showScreen('setup-screen'); }, okText: '이어하기', cancelText: '새로 시작', okClass: 'bg-green-600 hover:bg-green-700', cancelClass: 'bg-red-600 hover:bg-red-700' });
                     } else {
-                        console.log('No saved data, starting new');
                         appData.state = getNewState();
-                        console.log('Calling showScreen with setup-screen');
                         showScreen('setup-screen');
                     }
                 },
@@ -1336,7 +1329,6 @@
             };
 
             if (actions[target.id]) {
-                console.log('Executing action for:', target.id);
                 actions[target.id]();
             } else if (roleCard) {
                 selectRole(roleCard.dataset.role);
