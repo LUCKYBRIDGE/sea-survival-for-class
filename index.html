@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!--
         Copyright (c) 2025 [Pinky]
         This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
@@ -456,6 +457,7 @@
             <h3 class="text-2xl font-bold mb-6 text-emerald-400">결과 저장 및 공유</h3>
             <div class="flex flex-col gap-4">
                 <button id="save-image-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all">🖼️ 이미지로 저장</button>
+                <button id="save-excel-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition-all">📊 엑셀로 저장</button>
                 <button id="share-image-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all">🔗 공유하기</button>
             </div>
         </div>
@@ -1241,6 +1243,131 @@
             }
         };
 
+        const exportToExcel = () => {
+            try {
+                const groupName = appData.state.groupName || '소속없음';
+                const studentNumber = appData.state.studentNumber || '00';
+                const studentName = appData.state.studentName || '이름없음';
+                const selectedRole = appData.state.selectedRole || '역할 미선택';
+                const teamMembers = appData.state.teamMembers || [];
+
+                const workbook = XLSX.utils.book_new();
+
+                const summaryData = [
+                    ['바다에서 살아남기 - 우선순위 결과'],
+                    [],
+                    ['학생 정보'],
+                    ['소속', groupName],
+                    ['번호', studentNumber],
+                    ['이름', studentName],
+                    ['선택 역할', selectedRole],
+                    [],
+                    ['모둠 구성원'],
+                ];
+
+                teamMembers.forEach((member) => {
+                    summaryData.push([member.name, member.role]);
+                });
+
+                summaryData.push([]);
+                summaryData.push(['결과 요약']);
+                summaryData.push(['구분', '점수']);
+                summaryData.push(['개인 점수', appData.state.individualScore || 0]);
+                summaryData.push(['그룹 점수', appData.state.groupScore || 0]);
+
+                const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+                summarySheet['!cols'] = [{ wch: 20 }, { wch: 30 }];
+                XLSX.utils.book_append_sheet(workbook, summarySheet, '요약');
+
+                const individualData = [
+                    ['개인 순위 결과'],
+                    [],
+                    ['순위', '물품명', '나의 순위', '미 해안경비대 순위', '차이', '점수'],
+                ];
+
+                let individualTotal = 0;
+                appData.state.rankedItems.forEach((item, index) => {
+                    if (item) {
+                        const expertRank = appData.items.find(i => i.id === item.id).rank;
+                        const myRank = index + 1;
+                        const diff = Math.abs(myRank - expertRank);
+                        const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
+                        individualTotal += score;
+
+                        individualData.push([
+                            myRank,
+                            item.name,
+                            myRank,
+                            expertRank,
+                            diff,
+                            score
+                        ]);
+                    }
+                });
+
+                individualData.push([]);
+                individualData.push(['', '', '', '', '총점', individualTotal]);
+
+                const individualSheet = XLSX.utils.aoa_to_sheet(individualData);
+                individualSheet['!cols'] = [
+                    { wch: 8 },
+                    { wch: 30 },
+                    { wch: 12 },
+                    { wch: 20 },
+                    { wch: 8 },
+                    { wch: 8 }
+                ];
+                XLSX.utils.book_append_sheet(workbook, individualSheet, '개인 순위');
+
+                const groupData = [
+                    ['그룹 순위 결과'],
+                    [],
+                    ['순위', '물품명', '그룹 순위', '미 해안경비대 순위', '차이', '점수'],
+                ];
+
+                let groupTotal = 0;
+                appData.state.groupRankedItems.forEach((item, index) => {
+                    if (item) {
+                        const expertRank = appData.items.find(i => i.id === item.id).rank;
+                        const groupRank = index + 1;
+                        const diff = Math.abs(groupRank - expertRank);
+                        const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
+                        groupTotal += score;
+
+                        groupData.push([
+                            groupRank,
+                            item.name,
+                            groupRank,
+                            expertRank,
+                            diff,
+                            score
+                        ]);
+                    }
+                });
+
+                groupData.push([]);
+                groupData.push(['', '', '', '', '총점', groupTotal]);
+
+                const groupSheet = XLSX.utils.aoa_to_sheet(groupData);
+                groupSheet['!cols'] = [
+                    { wch: 8 },
+                    { wch: 30 },
+                    { wch: 12 },
+                    { wch: 20 },
+                    { wch: 8 },
+                    { wch: 8 }
+                ];
+                XLSX.utils.book_append_sheet(workbook, groupSheet, '그룹 순위');
+
+                XLSX.writeFile(workbook, `바다생존_엑셀_${groupName}_${studentNumber}_${studentName}.xlsx`);
+
+                closeModal(dom.saveShareModalEl);
+            } catch (error) {
+                console.error('엑셀 저장 오류:', error);
+                showAlert('엑셀 파일 저장 중 오류가 발생했습니다.', '오류');
+            }
+        };
+
         const handleBodyClick = (event) => {
             const target = event.target;
             const roleCard = target.closest('.role-card');
@@ -1320,6 +1447,7 @@
                 'restart-btn': () => showConfirm('정말 모든 진행 상황을 삭제하고 다시 시작하시겠습니까?', restartApp, '다시 시작하기', { okText: '다시 시작', cancelText: '취소' }),
                 'open-save-share-modal-btn': () => openModal(dom.saveShareModalEl),
                 'save-image-btn': () => { closeModal(dom.saveShareModalEl); downloadReport(); },
+                'save-excel-btn': () => { closeModal(dom.saveShareModalEl); exportToExcel(); },
                 'share-image-btn': () => { closeModal(dom.saveShareModalEl); shareReport(); },
                 'check-understanding-btn': () => {
                     const modal = document.getElementById('role-understanding-modal');
