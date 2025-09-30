@@ -1289,7 +1289,7 @@
                         const itemInfo = appData.items.find(i => i.id === rankedItem.id);
                         if (itemInfo) {
                             const myRank = index + 1;
-                            const expertRank = itemInfo.rank;
+                            const expertRank = itemInfo.uscgRank;
                             const diff = Math.abs(myRank - expertRank);
                             const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
                             individualTotal += score;
@@ -1303,7 +1303,7 @@
                         const itemInfo = appData.items.find(i => i.id === rankedItem.id);
                         if (itemInfo) {
                             const groupRank = index + 1;
-                            const expertRank = itemInfo.rank;
+                            const expertRank = itemInfo.uscgRank;
                             const diff = Math.abs(groupRank - expertRank);
                             const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
                             groupTotal += score;
@@ -1342,7 +1342,7 @@
                         const itemInfo = appData.items.find(i => i.id === rankedItem.id);
                         if (itemInfo) {
                             const myRank = index + 1;
-                            const expertRank = itemInfo.rank;
+                            const expertRank = itemInfo.uscgRank;
                             const diff = Math.abs(myRank - expertRank);
                             const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
 
@@ -1390,7 +1390,7 @@
                         const itemInfo = appData.items.find(i => i.id === rankedItem.id);
                         if (itemInfo) {
                             const groupRank = index + 1;
-                            const expertRank = itemInfo.rank;
+                            const expertRank = itemInfo.uscgRank;
                             const diff = Math.abs(groupRank - expertRank);
                             const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
 
@@ -1436,12 +1436,13 @@
                 itemsData.push([]);
                 itemsData.push(['전문가 순위', '물품명', '전문가 설명']);
 
-                const sortedItems = [...appData.items].sort((a, b) => a.rank - b.rank);
+                const sortedItems = [...appData.items].sort((a, b) => a.uscgRank - b.uscgRank);
                 sortedItems.forEach(item => {
+                    const expertInfo = appData.expertRanking.find(e => e.name === item.name);
                     itemsData.push([
-                        item.rank + '위',
+                        item.uscgRank + '위',
                         (item.icon || '') + ' ' + (item.name || ''),
-                        item.expertReason || item.description || ''
+                        expertInfo ? expertInfo.reason : item.description || ''
                     ]);
                 });
 
