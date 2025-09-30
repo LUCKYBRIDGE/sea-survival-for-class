@@ -1281,31 +1281,41 @@
                 // 점수 계산
                 let individualTotal = 0;
                 let groupTotal = 0;
+                let individualMaxScore = 0;
+                let groupMaxScore = 0;
 
-                appData.state.rankedItems.forEach((item, index) => {
-                    if (item) {
-                        const expertRank = appData.items.find(i => i.id === item.id).rank;
-                        const myRank = index + 1;
-                        const diff = Math.abs(myRank - expertRank);
-                        const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
-                        individualTotal += score;
+                appData.state.rankedItems.forEach((rankedItem, index) => {
+                    if (rankedItem && rankedItem.id) {
+                        const itemInfo = appData.items.find(i => i.id === rankedItem.id);
+                        if (itemInfo) {
+                            const myRank = index + 1;
+                            const expertRank = itemInfo.rank;
+                            const diff = Math.abs(myRank - expertRank);
+                            const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
+                            individualTotal += score;
+                            individualMaxScore += 10;
+                        }
                     }
                 });
 
-                appData.state.groupRankedItems.forEach((item, index) => {
-                    if (item) {
-                        const expertRank = appData.items.find(i => i.id === item.id).rank;
-                        const groupRank = index + 1;
-                        const diff = Math.abs(groupRank - expertRank);
-                        const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
-                        groupTotal += score;
+                appData.state.groupRankedItems.forEach((rankedItem, index) => {
+                    if (rankedItem && rankedItem.id) {
+                        const itemInfo = appData.items.find(i => i.id === rankedItem.id);
+                        if (itemInfo) {
+                            const groupRank = index + 1;
+                            const expertRank = itemInfo.rank;
+                            const diff = Math.abs(groupRank - expertRank);
+                            const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
+                            groupTotal += score;
+                            groupMaxScore += 10;
+                        }
                     }
                 });
 
                 summaryData.push(['■ 평가 결과']);
-                summaryData.push(['구분', '점수', '최고점', '달성률']);
-                summaryData.push(['개인 순위', individualTotal + '점', '150점', Math.round(individualTotal/150*100) + '%']);
-                summaryData.push(['그룹 순위', groupTotal + '점', '150점', Math.round(groupTotal/150*100) + '%']);
+                summaryData.push(['구분', '점수', '배점', '달성률']);
+                summaryData.push(['개인 순위', individualTotal + '점', individualMaxScore + '점', individualMaxScore > 0 ? Math.round(individualTotal/individualMaxScore*100) + '%' : '0%']);
+                summaryData.push(['그룹 순위', groupTotal + '점', groupMaxScore + '점', groupMaxScore > 0 ? Math.round(groupTotal/groupMaxScore*100) + '%' : '0%']);
                 summaryData.push([]);
                 summaryData.push(['점수 향상도:', (groupTotal - individualTotal) + '점']);
 
@@ -1327,22 +1337,24 @@
                 individualData.push([]);
                 individualData.push(['순위', '물품명', '나의 선택', '전문가 순위', '차이', '획득 점수']);
 
-                appData.state.rankedItems.forEach((item, index) => {
-                    if (item) {
-                        const itemInfo = appData.items.find(i => i.id === item.id);
-                        const expertRank = itemInfo.rank;
-                        const myRank = index + 1;
-                        const diff = Math.abs(myRank - expertRank);
-                        const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
+                appData.state.rankedItems.forEach((rankedItem, index) => {
+                    if (rankedItem && rankedItem.id) {
+                        const itemInfo = appData.items.find(i => i.id === rankedItem.id);
+                        if (itemInfo) {
+                            const myRank = index + 1;
+                            const expertRank = itemInfo.rank;
+                            const diff = Math.abs(myRank - expertRank);
+                            const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
 
-                        individualData.push([
-                            myRank + '위',
-                            item.icon + ' ' + item.name,
-                            myRank + '위',
-                            expertRank + '위',
-                            diff === 0 ? '일치' : diff + '단계 차이',
-                            score + '점'
-                        ]);
+                            individualData.push([
+                                myRank + '위',
+                                (itemInfo.icon || '') + ' ' + (itemInfo.name || ''),
+                                myRank + '위',
+                                expertRank + '위',
+                                diff === 0 ? '일치' : diff + '단계 차이',
+                                score + '점'
+                            ]);
+                        }
                     }
                 });
 
@@ -1350,8 +1362,8 @@
                 individualData.push(['', '', '', '', '합계:', individualTotal + '점']);
                 individualData.push([]);
                 individualData.push(['■ 평가']);
-                individualData.push(['총점:', individualTotal + '점 / 150점']);
-                individualData.push(['달성률:', Math.round(individualTotal/150*100) + '%']);
+                individualData.push(['총점:', individualTotal + '점 / ' + individualMaxScore + '점']);
+                individualData.push(['달성률:', individualMaxScore > 0 ? Math.round(individualTotal/individualMaxScore*100) + '%' : '0%']);
 
                 const individualSheet = XLSX.utils.aoa_to_sheet(individualData);
                 individualSheet['!cols'] = [
@@ -1373,22 +1385,24 @@
                 groupData.push([]);
                 groupData.push(['순위', '물품명', '그룹 선택', '전문가 순위', '차이', '획득 점수']);
 
-                appData.state.groupRankedItems.forEach((item, index) => {
-                    if (item) {
-                        const itemInfo = appData.items.find(i => i.id === item.id);
-                        const expertRank = itemInfo.rank;
-                        const groupRank = index + 1;
-                        const diff = Math.abs(groupRank - expertRank);
-                        const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
+                appData.state.groupRankedItems.forEach((rankedItem, index) => {
+                    if (rankedItem && rankedItem.id) {
+                        const itemInfo = appData.items.find(i => i.id === rankedItem.id);
+                        if (itemInfo) {
+                            const groupRank = index + 1;
+                            const expertRank = itemInfo.rank;
+                            const diff = Math.abs(groupRank - expertRank);
+                            const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
 
-                        groupData.push([
-                            groupRank + '위',
-                            item.icon + ' ' + item.name,
-                            groupRank + '위',
-                            expertRank + '위',
-                            diff === 0 ? '일치' : diff + '단계 차이',
-                            score + '점'
-                        ]);
+                            groupData.push([
+                                groupRank + '위',
+                                (itemInfo.icon || '') + ' ' + (itemInfo.name || ''),
+                                groupRank + '위',
+                                expertRank + '위',
+                                diff === 0 ? '일치' : diff + '단계 차이',
+                                score + '점'
+                            ]);
+                        }
                     }
                 });
 
@@ -1396,14 +1410,14 @@
                 groupData.push(['', '', '', '', '합계:', groupTotal + '점']);
                 groupData.push([]);
                 groupData.push(['■ 평가']);
-                groupData.push(['총점:', groupTotal + '점 / 150점']);
-                groupData.push(['달성률:', Math.round(groupTotal/150*100) + '%']);
+                groupData.push(['총점:', groupTotal + '점 / ' + groupMaxScore + '점']);
+                groupData.push(['달성률:', groupMaxScore > 0 ? Math.round(groupTotal/groupMaxScore*100) + '%' : '0%']);
                 groupData.push([]);
                 groupData.push(['■ 토의 효과']);
                 groupData.push(['개인 점수:', individualTotal + '점']);
                 groupData.push(['그룹 점수:', groupTotal + '점']);
                 groupData.push(['점수 향상:', (groupTotal - individualTotal) + '점']);
-                groupData.push(['향상률:', groupTotal > individualTotal ? '+' + Math.round((groupTotal - individualTotal)/individualTotal*100) + '%' : Math.round((groupTotal - individualTotal)/individualTotal*100) + '%']);
+                groupData.push(['향상률:', individualTotal > 0 ? (groupTotal > individualTotal ? '+' : '') + Math.round((groupTotal - individualTotal)/individualTotal*100) + '%' : '계산불가']);
 
                 const groupSheet = XLSX.utils.aoa_to_sheet(groupData);
                 groupSheet['!cols'] = [
@@ -1426,7 +1440,7 @@
                 sortedItems.forEach(item => {
                     itemsData.push([
                         item.rank + '위',
-                        item.icon + ' ' + item.name,
+                        (item.icon || '') + ' ' + (item.name || ''),
                         item.expertReason || item.description || ''
                     ]);
                 });
