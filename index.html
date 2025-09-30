@@ -1251,41 +1251,37 @@
                 const selectedRole = appData.state.selectedRole || '역할 미선택';
                 const teamMembers = appData.state.teamMembers || [];
 
+                // 워크북 생성
                 const workbook = XLSX.utils.book_new();
 
-                const summaryData = [
-                    ['바다에서 살아남기 - 우선순위 결과'],
-                    [],
-                    ['학생 정보'],
-                    ['소속', groupName],
-                    ['번호', studentNumber],
-                    ['이름', studentName],
-                    ['선택 역할', selectedRole],
-                    [],
-                    ['모둠 구성원'],
-                ];
+                // 요약 시트
+                const summaryData = [];
 
-                teamMembers.forEach((member) => {
-                    summaryData.push([member.name, member.role]);
-                });
-
+                summaryData.push(['바다에서 살아남기 - 모둠 활동 결과']);
                 summaryData.push([]);
-                summaryData.push(['결과 요약']);
-                summaryData.push(['구분', '점수']);
-                summaryData.push(['개인 점수', appData.state.individualScore || 0]);
-                summaryData.push(['그룹 점수', appData.state.groupScore || 0]);
 
-                const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-                summarySheet['!cols'] = [{ wch: 20 }, { wch: 30 }];
-                XLSX.utils.book_append_sheet(workbook, summarySheet, '요약');
+                summaryData.push(['■ 학생 정보']);
+                summaryData.push(['소속:', groupName]);
+                summaryData.push(['번호:', studentNumber]);
+                summaryData.push(['이름:', studentName]);
+                summaryData.push(['선택 역할:', selectedRole]);
+                summaryData.push([]);
 
-                const individualData = [
-                    ['개인 순위 결과'],
-                    [],
-                    ['순위', '물품명', '나의 순위', '미 해안경비대 순위', '차이', '점수'],
-                ];
+                summaryData.push(['■ 모둠 구성원']);
+                if (teamMembers.length > 0) {
+                    summaryData.push(['이름', '역할']);
+                    teamMembers.forEach((member) => {
+                        summaryData.push([member.name, member.role]);
+                    });
+                } else {
+                    summaryData.push(['(등록된 모둠 구성원 없음)']);
+                }
+                summaryData.push([]);
 
+                // 점수 계산
                 let individualTotal = 0;
+                let groupTotal = 0;
+
                 appData.state.rankedItems.forEach((item, index) => {
                     if (item) {
                         const expertRank = appData.items.find(i => i.id === item.id).rank;
@@ -1293,39 +1289,9 @@
                         const diff = Math.abs(myRank - expertRank);
                         const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
                         individualTotal += score;
-
-                        individualData.push([
-                            myRank,
-                            item.name,
-                            myRank,
-                            expertRank,
-                            diff,
-                            score
-                        ]);
                     }
                 });
 
-                individualData.push([]);
-                individualData.push(['', '', '', '', '총점', individualTotal]);
-
-                const individualSheet = XLSX.utils.aoa_to_sheet(individualData);
-                individualSheet['!cols'] = [
-                    { wch: 8 },
-                    { wch: 30 },
-                    { wch: 12 },
-                    { wch: 20 },
-                    { wch: 8 },
-                    { wch: 8 }
-                ];
-                XLSX.utils.book_append_sheet(workbook, individualSheet, '개인 순위');
-
-                const groupData = [
-                    ['그룹 순위 결과'],
-                    [],
-                    ['순위', '물품명', '그룹 순위', '미 해안경비대 순위', '차이', '점수'],
-                ];
-
-                let groupTotal = 0;
                 appData.state.groupRankedItems.forEach((item, index) => {
                     if (item) {
                         const expertRank = appData.items.find(i => i.id === item.id).rank;
@@ -1333,33 +1299,149 @@
                         const diff = Math.abs(groupRank - expertRank);
                         const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
                         groupTotal += score;
+                    }
+                });
+
+                summaryData.push(['■ 평가 결과']);
+                summaryData.push(['구분', '점수', '최고점', '달성률']);
+                summaryData.push(['개인 순위', individualTotal + '점', '150점', Math.round(individualTotal/150*100) + '%']);
+                summaryData.push(['그룹 순위', groupTotal + '점', '150점', Math.round(groupTotal/150*100) + '%']);
+                summaryData.push([]);
+                summaryData.push(['점수 향상도:', (groupTotal - individualTotal) + '점']);
+
+                const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+                summarySheet['!cols'] = [
+                    { wch: 15 },
+                    { wch: 12 },
+                    { wch: 12 },
+                    { wch: 12 }
+                ];
+                XLSX.utils.book_append_sheet(workbook, summarySheet, '요약');
+
+                // 개인 순위 시트
+                const individualData = [];
+
+                individualData.push(['바다에서 살아남기 - 개인 순위 결과']);
+                individualData.push([]);
+                individualData.push(['■ 개인 우선순위 평가']);
+                individualData.push([]);
+                individualData.push(['순위', '물품명', '나의 선택', '전문가 순위', '차이', '획득 점수']);
+
+                appData.state.rankedItems.forEach((item, index) => {
+                    if (item) {
+                        const itemInfo = appData.items.find(i => i.id === item.id);
+                        const expertRank = itemInfo.rank;
+                        const myRank = index + 1;
+                        const diff = Math.abs(myRank - expertRank);
+                        const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
+
+                        individualData.push([
+                            myRank + '위',
+                            item.icon + ' ' + item.name,
+                            myRank + '위',
+                            expertRank + '위',
+                            diff === 0 ? '일치' : diff + '단계 차이',
+                            score + '점'
+                        ]);
+                    }
+                });
+
+                individualData.push([]);
+                individualData.push(['', '', '', '', '합계:', individualTotal + '점']);
+                individualData.push([]);
+                individualData.push(['■ 평가']);
+                individualData.push(['총점:', individualTotal + '점 / 150점']);
+                individualData.push(['달성률:', Math.round(individualTotal/150*100) + '%']);
+
+                const individualSheet = XLSX.utils.aoa_to_sheet(individualData);
+                individualSheet['!cols'] = [
+                    { wch: 10 },
+                    { wch: 35 },
+                    { wch: 12 },
+                    { wch: 15 },
+                    { wch: 15 },
+                    { wch: 12 }
+                ];
+                XLSX.utils.book_append_sheet(workbook, individualSheet, '개인순위');
+
+                // 그룹 순위 시트
+                const groupData = [];
+
+                groupData.push(['바다에서 살아남기 - 그룹 순위 결과']);
+                groupData.push([]);
+                groupData.push(['■ 그룹 토의 후 우선순위 평가']);
+                groupData.push([]);
+                groupData.push(['순위', '물품명', '그룹 선택', '전문가 순위', '차이', '획득 점수']);
+
+                appData.state.groupRankedItems.forEach((item, index) => {
+                    if (item) {
+                        const itemInfo = appData.items.find(i => i.id === item.id);
+                        const expertRank = itemInfo.rank;
+                        const groupRank = index + 1;
+                        const diff = Math.abs(groupRank - expertRank);
+                        const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
 
                         groupData.push([
-                            groupRank,
-                            item.name,
-                            groupRank,
-                            expertRank,
-                            diff,
-                            score
+                            groupRank + '위',
+                            item.icon + ' ' + item.name,
+                            groupRank + '위',
+                            expertRank + '위',
+                            diff === 0 ? '일치' : diff + '단계 차이',
+                            score + '점'
                         ]);
                     }
                 });
 
                 groupData.push([]);
-                groupData.push(['', '', '', '', '총점', groupTotal]);
+                groupData.push(['', '', '', '', '합계:', groupTotal + '점']);
+                groupData.push([]);
+                groupData.push(['■ 평가']);
+                groupData.push(['총점:', groupTotal + '점 / 150점']);
+                groupData.push(['달성률:', Math.round(groupTotal/150*100) + '%']);
+                groupData.push([]);
+                groupData.push(['■ 토의 효과']);
+                groupData.push(['개인 점수:', individualTotal + '점']);
+                groupData.push(['그룹 점수:', groupTotal + '점']);
+                groupData.push(['점수 향상:', (groupTotal - individualTotal) + '점']);
+                groupData.push(['향상률:', groupTotal > individualTotal ? '+' + Math.round((groupTotal - individualTotal)/individualTotal*100) + '%' : Math.round((groupTotal - individualTotal)/individualTotal*100) + '%']);
 
                 const groupSheet = XLSX.utils.aoa_to_sheet(groupData);
                 groupSheet['!cols'] = [
-                    { wch: 8 },
-                    { wch: 30 },
+                    { wch: 10 },
+                    { wch: 35 },
                     { wch: 12 },
-                    { wch: 20 },
-                    { wch: 8 },
-                    { wch: 8 }
+                    { wch: 15 },
+                    { wch: 15 },
+                    { wch: 12 }
                 ];
-                XLSX.utils.book_append_sheet(workbook, groupSheet, '그룹 순위');
+                XLSX.utils.book_append_sheet(workbook, groupSheet, '그룹순위');
 
-                XLSX.writeFile(workbook, `바다생존_엑셀_${groupName}_${studentNumber}_${studentName}.xlsx`);
+                // 전체 물품 목록 시트
+                const itemsData = [];
+                itemsData.push(['바다에서 살아남기 - 전체 물품 정보']);
+                itemsData.push([]);
+                itemsData.push(['전문가 순위', '물품명', '전문가 설명']);
+
+                const sortedItems = [...appData.items].sort((a, b) => a.rank - b.rank);
+                sortedItems.forEach(item => {
+                    itemsData.push([
+                        item.rank + '위',
+                        item.icon + ' ' + item.name,
+                        item.expertReason || item.description || ''
+                    ]);
+                });
+
+                const itemsSheet = XLSX.utils.aoa_to_sheet(itemsData);
+                itemsSheet['!cols'] = [
+                    { wch: 12 },
+                    { wch: 35 },
+                    { wch: 70 }
+                ];
+                XLSX.utils.book_append_sheet(workbook, itemsSheet, '전체물품');
+
+                // 파일 저장
+                const fileName = `바다생존_모둠_${groupName}_${studentNumber}_${studentName}_${new Date().toISOString().slice(0,10)}.xlsx`;
+                XLSX.writeFile(workbook, fileName, { bookType: 'xlsx', type: 'binary' });
 
                 closeModal(dom.saveShareModalEl);
             } catch (error) {
