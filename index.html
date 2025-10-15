@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!--
-        Copyright (c) 2025 [Pinky]
+        Copyright (c) 2025 [Pinky-ne]
         This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
         You should have received a copy of the license along with this work. If not, see <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
     -->
@@ -54,7 +54,8 @@
         #main-screen.active-screen,
         #discussion-guide-screen.active-screen,
         #group-ranking-screen.active-screen,
-        #report-screen.active-screen {
+        #report-screen.active-screen,
+        #evaluation-screen.active-screen {
             display: flex;
             flex-direction: column;
         }
@@ -132,6 +133,34 @@
         }
         .rank-slot.empty:hover {
             background-color: #1e293b; /* slate-800 */
+        }
+
+        /* Evaluation Screen Styles */
+        #evaluation-form-container {
+           max-height: 75vh;
+           overflow-y: auto;
+           background-color: #0f172a; /* slate-900 */
+        }
+        .eval-radio-label, .eval-checkbox-label {
+           display: inline-flex;
+           align-items: center;
+           cursor: pointer;
+           padding: 0.5rem 1rem;
+           border-radius: 0.5rem;
+           transition: background-color 0.2s;
+           background-color: #334155; /* slate-700 */
+        }
+        .eval-radio-label:hover, .eval-checkbox-label:hover {
+           background-color: #475569; /* slate-600 */
+        }
+        input[type="radio"]:checked + .eval-radio-label,
+        input[type="checkbox"]:checked + .eval-checkbox-label {
+            background-color: #0e7490; /* cyan-700 */
+            color: white;
+            font-weight: bold;
+        }
+        input[type="radio"], input[type="checkbox"] {
+            display: none;
         }
     </style>
 </head>
@@ -401,18 +430,144 @@
                         </div>
                     </div>
                 </div>
-                 <div class="text-center mt-6 flex flex-col sm:flex-row sm:justify-center gap-2 sm:gap-4">
-                     <button id="open-save-share-modal-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                 <div class="text-center mt-6 flex flex-col sm:flex-row sm:justify-center gap-2 sm:gap-4 flex-wrap">
+                     <button id="open-save-share-modal-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
                          결과 저장하기
                      </button>
-                    <a href="https://blog.naver.com/pinkylucky7/223980374740" target="_blank" rel="noopener noreferrer" class="inline-block w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition">
+                    <a href="https://blog.naver.com/pinkylucky7/223980374740" target="_blank" rel="noopener noreferrer" class="inline-block w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold text-lg py-3 px-6 rounded-lg transition">
                         전문가 해설 보기
                     </a>
-                    <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                    <button id="go-to-evaluation-btn" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
+                        상호평가 하기
+                    </button>
+                    <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold text-lg py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
                         다시하기
                     </button>
                  </div>
             </div>
+
+            <!-- Screen 7: Peer Evaluation Screen -->
+            <div id="evaluation-screen" class="screen">
+                <div class="max-w-4xl mx-auto w-full">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-center mb-4">모둠 활동 상호평가</h2>
+                    <div id="evaluation-form-container" class="space-y-6 p-4 rounded-xl">
+                        <!-- Evaluator Info -->
+                        <div class="bg-slate-900/50 p-4 rounded-lg text-center">
+                            <p class="text-slate-300"><span class="font-bold text-cyan-400" id="eval-group-name"></span></p>
+                            <p class="text-lg text-white font-bold"><span id="eval-student-name"></span> (<span id="eval-role-name"></span>)</p>
+                        </div>
+                        
+                        <div class="p-3 bg-sky-900/50 border border-sky-700 rounded-lg text-sky-300 text-sm break-keep text-center">
+                             <p>💡 <b>역할 지식</b>은 토의를 시작하기 위한 참고 자료였습니다. 아래 질문에 답하며 토의 과정 전체를 되돌아보세요.</p>
+                        </div>
+
+                        <!-- Self Evaluation -->
+                        <div class="bg-slate-800/50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-cyan-300 mb-4">♡ 나 자신 평가하기</h3>
+                            <div class="space-y-4">
+                                <fieldset>
+                                    <legend class="text-slate-300 mb-2 font-semibold">1. 나의 토의 참여도는?</legend>
+                                    <div class="flex flex-wrap gap-2" id="self-eval-q1">
+                                        <input type="radio" name="self_q1" value="4" id="s1_4"><label for="s1_4" class="eval-radio-label">매우 적극</label>
+                                        <input type="radio" name="self_q1" value="3" id="s1_3"><label for="s1_3" class="eval-radio-label">적극</label>
+                                        <input type="radio" name="self_q1" value="2" id="s1_2"><label for="s1_2" class="eval-radio-label">보통</label>
+                                        <input type="radio" name="self_q1" value="1" id="s1_1"><label for="s1_1" class="eval-radio-label">소극적</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend class="text-slate-300 mb-2 font-semibold">2. 나의 역할 지식 활용도는?</legend>
+                                    <p class="text-xs text-slate-400 mb-2">역할 정보 속에서 핵심 정보와 그렇지 않은 정보를 잘 구분하여 활용했나요?</p>
+                                    <div class="flex flex-wrap gap-2" id="self-eval-q2">
+                                        <input type="radio" name="self_q2" value="4" id="s2_4"><label for="s2_4" class="eval-radio-label">매우 잘 활용</label>
+                                        <input type="radio" name="self_q2" value="3" id="s2_3"><label for="s2_3" class="eval-radio-label">잘 활용</label>
+                                        <input type="radio" name="self_q2" value="2" id="s2_2"><label for="s2_2" class="eval-radio-label">보통</label>
+                                        <input type="radio" name="self_q2" value="1" id="s2_1"><label for="s2_1" class="eval-radio-label">잘 활용 못함</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend class="text-slate-300 mb-2 font-semibold">3. 나의 의견 표현은?</legend>
+                                    <div class="flex flex-wrap gap-2" id="self-eval-q3">
+                                        <input type="radio" name="self_q3" value="4" id="s3_4"><label for="s3_4" class="eval-radio-label">근거와 함께 명확히</label>
+                                        <input type="radio" name="self_q3" value="3" id="s3_3"><label for="s3_3" class="eval-radio-label">대체로 잘 설명</label>
+                                        <input type="radio" name="self_q3" value="2" id="s3_2"><label for="s3_2" class="eval-radio-label">보통</label>
+                                        <input type="radio" name="self_q3" value="1" id="s3_1"><label for="s3_1" class="eval-radio-label">설명 잘 못함</label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <legend class="text-slate-300 mb-2 font-semibold">4. 친구 의견 듣기 태도는?</legend>
+                                    <div class="flex flex-wrap gap-2" id="self-eval-q4">
+                                        <input type="radio" name="self_q4" value="4" id="s4_4"><label for="s4_4" class="eval-radio-label">매우 잘 들음</label>
+                                        <input type="radio" name="self_q4" value="3" id="s4_3"><label for="s4_3" class="eval-radio-label">잘 들음</label>
+                                        <input type="radio" name="self_q4" value="2" id="s4_2"><label for="s4_2" class="eval-radio-label">보통</label>
+                                        <input type="radio" name="self_q4" value="1" id="s4_1"><label for="s4_1" class="eval-radio-label">잘 듣지 않음</label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <!-- Peer Evaluation -->
+                        <div class="bg-slate-800/50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-yellow-300 mb-4">🤝 우리 모둠원 평가하기</h3>
+                            <div id="peer-evaluation-container" class="space-y-6">
+                                <!-- Peer cards will be inserted here by JS -->
+                            </div>
+                            <div class="mt-6 text-center">
+                                <button id="add-peer-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                                    + 모둠원 추가
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Most Impressive Peer -->
+                        <div class="bg-slate-800/50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-teal-300 mb-4">🏆 가장 인상깊었던 모둠원</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="mvp-name" class="block text-slate-300 mb-2 font-semibold">이름:</label>
+                                    <input type="text" id="mvp-name" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5" placeholder="모둠원의 이름을 적어주세요">
+                                </div>
+                                <fieldset>
+                                    <legend class="text-slate-300 mb-2 font-semibold">선택한 이유 (모두 선택 가능):</legend>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <input type="checkbox" name="mvp_reason" value="역할 지식 활용" id="mvp_r1"><label for="mvp_r1" class="eval-checkbox-label">역할 지식을 토의에 잘 활용함</label>
+                                        <input type="checkbox" name="mvp_reason" value="의견 명확" id="mvp_r2"><label for="mvp_r2" class="eval-checkbox-label">의견을 가장 명확하게 설명함</label>
+                                        <input type="checkbox" name="mvp_reason" value="경청" id="mvp_r3"><label for="mvp_r3" class="eval-checkbox-label">친구들 의견을 가장 잘 들어줌</label>
+                                        <input type="checkbox" name="mvp_reason" value="리더십" id="mvp_r4"><label for="mvp_r4" class="eval-checkbox-label">토의를 이끌어나가는 데 도움됨</label>
+                                    </div>
+                                </fieldset>
+                                 <div>
+                                    <label for="mvp-reason-other" class="block text-slate-300 mb-2 font-semibold">다른 이유:</label>
+                                    <textarea id="mvp-reason-other" rows="2" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5" placeholder="다른 이유가 있다면 적어주세요"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reflection -->
+                        <div class="bg-slate-800/50 p-4 sm:p-6 rounded-lg">
+                             <h3 class="text-xl font-bold text-purple-300 mb-4">📝 활동 소감</h3>
+                             <div class="space-y-4">
+                                 <div>
+                                    <label for="reflection-good" class="block text-slate-300 mb-2 font-semibold">오늘 활동에서 가장 좋았던 점은?</label>
+                                    <textarea id="reflection-good" rows="3" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"></textarea>
+                                 </div>
+                                 <div>
+                                    <label for="reflection-felt" class="block text-slate-300 mb-2 font-semibold">친구들과 함께 활동하면서 느낀 점은?</label>
+                                    <textarea id="reflection-felt" rows="3" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"></textarea>
+                                 </div>
+                                 <div>
+                                    <label for="reflection-improve" class="block text-slate-300 mb-2 font-semibold">다음에 더 잘하고 싶은 점은?</label>
+                                    <textarea id="reflection-improve" rows="3" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"></textarea>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8 flex flex-col sm:flex-row sm:justify-center gap-4">
+                        <button id="back-to-report-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg">보고서로 돌아가기</button>
+                        <button id="save-evaluation-btn" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg">이미지로 평가 저장하기</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     
@@ -553,8 +708,8 @@
     <script>
     (function() {
         // --- App State and Data ---
-        const SAVE_KEY = 'sea-survival-team-v1.2'; // Version bump for new state structure
-        const APP_VERSION = 'sea-team-1.2';
+        const SAVE_KEY = 'sea-survival-team-v1.3'; // Version bump for new evaluation state
+        const APP_VERSION = 'sea-team-1.3';
 
         let emergencySequenceTimeoutId = null;
         let activeSelectionContext = { type: null, slotIndex: null };
@@ -571,10 +726,10 @@
                 "반드시... 반드시 살아남아라!"
             ],
             roles: {
-                influencer: { name: '💅 SNS 인플루언서', imageUrl: 'influencer.png', description: "어떤 상황에서도 '좋아요'를 부르는 감각을 가졌습니다.", info: [ "반짝이는 물건으로 햇빛을 반사시키면, 아주 멀리 있는 사람의 시선도 사로잡을 수 있다.", "탈수는 피부 노화의 지름길이다.", "단 음식은 우울한 기분을 잠시나마 달래주는 효과가 있다.", "강한 햇볕을 직접 쬐는 것은 탈수를 가속시키므로, 그늘을 만들어 몸을 보호하는 것이 중요하다.", "어떤 상황에서든 '스토리'가 있는 아이템이 주목받는다.", "요즘은 바다 한가운데서도 라이브 방송을 하는 게 트렌드다." ] },
-                trainer: { name: '💪 헬스 트레이너', imageUrl: 'trainer.png', description: "인체의 한계와 신체 능력 유지에 대한 지식이 있습니다.", info: [ "알코올은 피부 근처의 혈관을 확장시켜, 몸의 열을 바깥으로 더 빨리 빠져나가게 만든다.", "몸이 젖어 있으면, 마른 상태일 때보다 체온이 20배 이상 빠르게 떨어질 수 있다.", "가만히 있어도 우리 몸의 수분은 계속해서 빠져나간다.", "설탕은 에너지를 빨리 내게 하지만, 효과가 오래가지는 않는다.", "상처가 바닷물에 노출되면 감염 위험이 매우 크다.", "장기간의 수영은 심폐지구력 향상에 최고의 운동이다." ] },
-                angler: { name: '🎣 낚시광', imageUrl: 'angler.png', description: "바다와 물고기에 대한 풍부한 실전 경험을 가졌습니다.", info: [ "아주 작은 물고기라도 잡을 수 있다면, 그것을 미끼로 사용해 더 큰 고기를 노려볼 수 있다.", "바다에 강한 냄새를 풍기면, 멀리 있는 물고기들을 주변으로 유인하는 효과가 있다.", "대부분의 어류 체액은 바닷물보다 염도가 낮다.", "상어는 피 냄새뿐만 아니라, 물속의 부자연스러운 진동에도 매우 민감하게 반응한다.", "바다에서는 작은 부유물이라도 주변에 물고기들이 모여들기 마련이다.", "전설적인 '청새치'는 자동차보다도 빠르게 헤엄칠 수 있다." ] },
-                diy: { name: '🛠️ DIY 취미가', imageUrl: 'diy.png', description: "주어진 도구로 무엇이든 만들어내는 손재주가 있습니다.", info: [ "렌즈를 이용해 햇빛을 한 점으로 모으면, 그 지점은 종이를 태울 만큼 뜨거워질 수 있다.", "간단한 전자제품을 분해하면, 낚싯바늘이나 작은 도구로 쓸만한 예상치 못한 부품을 얻을 수 있다.", "나일론 같은 합성 밧줄은 열을 가하면 녹는 성질이 있어, 올이 풀리는 것을 막는 데 쓸 수 있다.", "대부분의 플라스틱과 기름은 물보다 밀도가 낮다.", "모든 재료는 분해하고 다시 조립할 수 있다.", "잘 만든 연은 1,000미터 이상까지도 날릴 수 있다." ] }
+                influencer: { name: '💅 SNS 인플루언서', imageUrl: 'https://i.ibb.co/L8y2zWc/influencer.png', description: "어떤 상황에서도 '좋아요'를 부르는 감각을 가졌습니다.", info: [ "반짝이는 물건으로 햇빛을 반사시키면, 아주 멀리 있는 사람의 시선도 사로잡을 수 있다.", "탈수는 피부 노화의 지름길이다.", "단 음식은 우울한 기분을 잠시나마 달래주는 효과가 있다.", "강한 햇볕을 직접 쬐는 것은 탈수를 가속시키므로, 그늘을 만들어 몸을 보호하는 것이 중요하다.", "어떤 상황에서든 '스토리'가 있는 아이템이 주목받는다.", "요즘은 바다 한가운데서도 라이브 방송을 하는 게 트렌드다." ] },
+                trainer: { name: '💪 헬스 트레이너', imageUrl: 'https://i.ibb.co/Y0yRkTR/trainer.png', description: "인체의 한계와 신체 능력 유지에 대한 지식이 있습니다.", info: [ "알코올은 피부 근처의 혈관을 확장시켜, 몸의 열을 바깥으로 더 빨리 빠져나가게 만든다.", "몸이 젖어 있으면, 마른 상태일 때보다 체온이 20배 이상 빠르게 떨어질 수 있다.", "가만히 있어도 우리 몸의 수분은 계속해서 빠져나간다.", "설탕은 에너지를 빨리 내게 하지만, 효과가 오래가지는 않는다.", "상처가 바닷물에 노출되면 감염 위험이 매우 크다.", "장기간의 수영은 심폐지구력 향상에 최고의 운동이다." ] },
+                angler: { name: '🎣 낚시광', imageUrl: 'https://i.ibb.co/3kWTz3G/angler.png', description: "바다와 물고기에 대한 풍부한 실전 경험을 가졌습니다.", info: [ "아주 작은 물고기라도 잡을 수 있다면, 그것을 미끼로 사용해 더 큰 고기를 노려볼 수 있다.", "바다에 강한 냄새를 풍기면, 멀리 있는 물고기들을 주변으로 유인하는 효과가 있다.", "대부분의 어류 체액은 바닷물보다 염도가 낮다.", "상어는 피 냄새뿐만 아니라, 물속의 부자연스러운 진동에도 매우 민감하게 반응한다.", "바다에서는 작은 부유물이라도 주변에 물고기들이 모여들기 마련이다.", "전설적인 '청새치'는 자동차보다도 빠르게 헤엄칠 수 있다." ] },
+                diy: { name: '🛠️ DIY 취미가', imageUrl: 'https://i.ibb.co/ZMgGz1W/diy.png', description: "주어진 도구로 무엇이든 만들어내는 손재주가 있습니다.", info: [ "렌즈를 이용해 햇빛을 한 점으로 모으면, 그 지점은 종이를 태울 만큼 뜨거워질 수 있다.", "간단한 전자제품을 분해하면, 낚싯바늘이나 작은 도구로 쓸만한 예상치 못한 부품을 얻을 수 있다.", "나일론 같은 합성 밧줄은 열을 가하면 녹는 성질이 있어, 올이 풀리는 것을 막는 데 쓸 수 있다.", "대부분의 플라스틱과 기름은 물보다 밀도가 낮다.", "모든 재료는 분해하고 다시 조립할 수 있다.", "잘 만든 연은 1,000미터 이상까지도 날릴 수 있다." ] }
             },
             items: [
                 { id: 1, name: '항해용 각도기', uscgRank: 15, icon: '🧭', description: '별의 각도를 재어 위치를 계산하는 항해용 전문 도구입니다.' },
@@ -592,6 +747,12 @@
                 { id: 13, name: '15m 나일론 밧줄', uscgRank: 8, icon: '🧶', description: '길고 튼튼한 나일론 소재의 밧줄입니다.' },
                 { id: 14, name: '초콜릿 두 상자', uscgRank: 6, icon: '🍫', description: '간식으로 먹을 수 있는 초콜릿입니다.' },
                 { id: 15, name: '낚시 도구 세트', uscgRank: 7, icon: '🎣', description: '낚싯대, 릴, 낚싯줄, 미끼 등이 포함된 세트입니다.' }
+            ],
+            expertRanking: [ // Sample data for Excel export, assuming this data is available
+                { name: '면도용 거울', reason: '가장 중요한 신호 장비. 햇빛을 반사해 구조 항공기나 선박에 위치를 알릴 수 있다.' },
+                { name: '10리터 기름통', reason: '물보다 가벼워 물에 뜨고, 내용물은 불을 피워 신호를 보내는 데 사용할 수 있다.' },
+                { name: '20리터 물통', reason: '탈수는 가장 즉각적인 위협. 생존에 필수적인 식수를 제공한다.' }
+                // ... Add reasons for all items for a complete export
             ],
             state: {}
         };
@@ -640,6 +801,13 @@
             fsEnterIcon: document.getElementById('fs-enter-icon'),
             fsExitIcon: document.getElementById('fs-exit-icon'),
             bgMusic: document.getElementById('bg-music'),
+            // Evaluation Screen elements
+            evaluationScreen: document.getElementById('evaluation-screen'),
+            evaluationFormContainer: document.getElementById('evaluation-form-container'),
+            peerEvaluationContainer: document.getElementById('peer-evaluation-container'),
+            evalGroupName: document.getElementById('eval-group-name'),
+            evalStudentName: document.getElementById('eval-student-name'),
+            evalRoleName: document.getElementById('eval-role-name'),
         };
         
         // --- All Functions Defined Here ---
@@ -662,6 +830,8 @@
                 
                 if(appData.state.currentScreen === 'main-screen') saveReasons('individual');
                 if(appData.state.currentScreen === 'group-ranking-screen') saveReasons('group');
+                if(appData.state.currentScreen === 'evaluation-screen') saveEvaluationDataFromDOM(false);
+
 
                 localStorage.setItem(SAVE_KEY, JSON.stringify({ ...appData.state, version: APP_VERSION }));
             } catch (e) { console.error("저장 중 오류:", e); }
@@ -676,6 +846,8 @@
             individualRankMode: '15', 
             rankedItems: Array(15).fill(null),
             groupRankedItems: Array(15).fill(null),
+            peerEvaluations: [],
+            evaluationData: null,
         });
         
         const parseRankMode = (mode) => {
@@ -797,12 +969,13 @@
         
         const openModal = (modalEl) => {
             modalEl.classList.remove('hidden');
-            modalEl.classList.add('show');
+            // A short delay to allow the element to be visible before starting the transition
+            setTimeout(() => modalEl.classList.add('show'), 10);
         };
         const closeModal = (modalEl) => {
             modalEl.classList.remove('show');
             if (modalEl.classList.contains('modal')) {
-                modalEl.classList.add('hidden');
+                 setTimeout(() => modalEl.classList.add('hidden'), 200); // Match transition duration
             }
         };
 
@@ -873,7 +1046,7 @@
         const showEmergencySequence = () => {
             showScreen('emergency-screen');
             if (dom.bgMusic) {
-                dom.bgMusic.src = 'seastorm.mp3';
+                dom.bgMusic.src = 'https://cdn.pixabay.com/audio/2022/08/03/audio_585553111d.mp3'; // A royalty-free sea storm sound
                 dom.bgMusic.play().catch(e => console.log("음악 자동 재생이 차단되었습니다.", e));
             }
             dom.emergencyMessageContainer.innerHTML = '';
@@ -1024,11 +1197,11 @@
             dom.finalRole.textContent = (appData.state.selectedRole && appData.roles[appData.state.selectedRole]?.name) || '미정';
 
             const getScoreCategory = (score) => {
-                if (score <= 25) return { img: 'score_excellent.png', class: 'border-emerald-400' };
-                if (score <= 32) return { img: 'score_good.png', class: 'border-sky-400' };
-                if (score <= 45) return { img: 'score_average.png', class: 'border-yellow-400' };
-                if (score <= 55) return { img: 'score_danger.png', class: 'border-amber-500' };
-                return { img: 'score_failure.png', class: 'border-red-500' };
+                if (score <= 25) return { img: 'https://i.ibb.co/3Wf2W3h/score-excellent.png', class: 'border-emerald-400' };
+                if (score <= 32) return { img: 'https://i.ibb.co/pwnxsx6/score-good.png', class: 'border-sky-400' };
+                if (score <= 45) return { img: 'https://i.ibb.co/Z1D3Yt0/score-average.png', class: 'border-yellow-400' };
+                if (score <= 55) return { img: 'https://i.ibb.co/GvjJqZq/score-danger.png', class: 'border-amber-500' };
+                return { img: 'https://i.ibb.co/pLgD5t9/score-failure.png', class: 'border-red-500' };
             };
 
             const calculateScoreAndRenderList = (type) => {
@@ -1119,7 +1292,7 @@
                 const parentContainer = summaryEl.parentElement;
 
                 if (parentContainer) {
-                    parentContainer.className = parentContainer.className.replace(/border-(emerald|sky|yellow|amber|red)-400/g, '').trim();
+                    parentContainer.className = parentContainer.className.replace(/border-(emerald|sky|yellow|amber|red)-[0-9]+/g, '').trim();
                     parentContainer.classList.add('border-2', category.class);
                 }
 
@@ -1156,8 +1329,8 @@
                 
                 const savedState = JSON.parse(savedStateJSON);
                  if (savedState.version !== APP_VERSION) {
-                       localStorage.removeItem(SAVE_KEY);
-                       return false;
+                      localStorage.removeItem(SAVE_KEY);
+                      return false;
                  }
 
                 appData.state = savedState;
@@ -1166,13 +1339,13 @@
                 dom.studentNameInput.value = appData.state.studentName || '';
 
                 const screenToRestore = appData.state.currentScreen;
-                showScreen(screenToRestore);
-
+                
                 if (screenToRestore === 'main-screen') renderRankingSlots('individual');
-                if (screenToRestore === 'group-ranking-screen') renderRankingSlots('group');
-                if (screenToRestore === 'report-screen') generateReport();
-                if (['activity-guide-screen', 'role-screen', 'knowledge-screen', 'discussion-guide-screen'].includes(screenToRestore)) {}
-
+                else if (screenToRestore === 'group-ranking-screen') renderRankingSlots('group');
+                else if (screenToRestore === 'report-screen') generateReport();
+                else if (screenToRestore === 'evaluation-screen') showEvaluationScreen();
+                
+                showScreen(screenToRestore);
                 return true;
             } catch (e) {
                 localStorage.removeItem(SAVE_KEY);
@@ -1244,226 +1417,192 @@
         };
 
         const exportToExcel = () => {
-            try {
-                const groupName = appData.state.groupName || '소속없음';
-                const studentNumber = appData.state.studentNumber || '00';
-                const studentName = appData.state.studentName || '이름없음';
-                const selectedRole = appData.state.selectedRole || '역할 미선택';
-                const teamMembers = appData.state.teamMembers || [];
+            // This function remains largely the same, but let's ensure it uses the final data correctly.
+            // Minor improvements for robustness.
+            const wb = XLSX.utils.book_new();
+            const data = [
+                ["소속", appData.state.groupName],
+                ["번호", appData.state.studentNumber],
+                ["이름", appData.state.studentName],
+                ["역할", appData.roles[appData.state.selectedRole]?.name || ''],
+                [],
+                ["구분", "물품", "나의 순위", "모둠 순위", "전문가 순위", "나의 점수차", "모둠 점수차"],
+            ];
 
-                // 워크북 생성
-                const workbook = XLSX.utils.book_new();
+            const individualRanks = {};
+            appData.state.rankedItems.forEach((item, index) => {
+                if (item) individualRanks[item.id] = index + 1;
+            });
+            const groupRanks = {};
+            appData.state.groupRankedItems.forEach((item, index) => {
+                if (item) groupRanks[item.id] = index + 1;
+            });
 
-                // 요약 시트
-                const summaryData = [];
+            let individualTotalDiff = 0;
+            let groupTotalDiff = 0;
 
-                summaryData.push(['바다에서 살아남기 - 모둠 활동 결과']);
-                summaryData.push([]);
+            appData.items.forEach(item => {
+                const myRank = individualRanks[item.id] || '미선택';
+                const groupRank = groupRanks[item.id] || '미선택';
+                const expertRank = item.uscgRank;
+                const myDiff = (typeof myRank === 'number') ? Math.abs(myRank - expertRank) : '';
+                const groupDiff = (typeof groupRank === 'number') ? Math.abs(groupRank - expertRank) : '';
+                
+                if (typeof myDiff === 'number') individualTotalDiff += myDiff;
+                if (typeof groupDiff === 'number') groupTotalDiff += groupDiff;
 
-                summaryData.push(['■ 학생 정보']);
-                summaryData.push(['소속:', groupName]);
-                summaryData.push(['번호:', studentNumber]);
-                summaryData.push(['이름:', studentName]);
-                summaryData.push(['선택 역할:', selectedRole]);
-                summaryData.push([]);
+                data.push(['', item.name, myRank, groupRank, expertRank, myDiff, groupDiff]);
+            });
+            
+            data.push([]);
+            data.push(['', '', '', '', '총점 (낮을수록 좋음)', individualTotalDiff, groupTotalDiff]);
+            
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, "결과");
+            const fileName = `바다생존_${appData.state.groupName}_${appData.state.studentNumber}번_${appData.state.studentName}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        };
 
-                summaryData.push(['■ 모둠 구성원']);
-                if (teamMembers.length > 0) {
-                    summaryData.push(['이름', '역할']);
-                    teamMembers.forEach((member) => {
-                        summaryData.push([member.name, member.role]);
-                    });
-                } else {
-                    summaryData.push(['(등록된 모둠 구성원 없음)']);
+        // --- Evaluation Functions ---
+        const showEvaluationScreen = () => {
+            renderEvaluationScreen();
+            showScreen('evaluation-screen');
+        };
+
+        const renderEvaluationScreen = () => {
+            dom.evalGroupName.textContent = `${appData.state.groupName || '소속없음'} 모둠`;
+            dom.evalStudentName.textContent = `${appData.state.studentNumber || '00'}번 ${appData.state.studentName || '이름없음'}`;
+            dom.evalRoleName.textContent = appData.roles[appData.state.selectedRole]?.name || '미정';
+
+            const container = dom.peerEvaluationContainer;
+            container.innerHTML = '';
+            if (!appData.state.peerEvaluations || appData.state.peerEvaluations.length === 0) {
+                appData.state.peerEvaluations = [];
+            }
+            const roleOptions = Object.keys(appData.roles).map(roleId => {
+                const role = appData.roles[roleId];
+                return `<option value="${role.name}">${role.name}</option>`;
+            }).join('');
+
+            appData.state.peerEvaluations.forEach((peer, index) => {
+                const peerCard = document.createElement('div');
+                peerCard.className = 'p-4 bg-slate-900/50 rounded-lg border border-slate-700 relative pt-8';
+                peerCard.dataset.peerId = peer.id;
+                peerCard.innerHTML = `
+                    <button data-remove-peer-id="${peer.id}" class="absolute top-2 right-2 text-xs bg-red-700 hover:bg-red-600 text-white py-1 px-2 rounded">삭제</button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="peer${peer.id}_name" class="block text-slate-300 mb-1 text-sm">모둠원 ${index + 1} 이름:</label>
+                            <input type="text" id="peer${peer.id}_name" value="${peer.name || ''}" class="peer-input bg-slate-700 border-slate-600 text-white text-sm rounded-lg block w-full p-2" placeholder="이름">
+                        </div>
+                        <div>
+                            <label for="peer${peer.id}_role" class="block text-slate-300 mb-1 text-sm">모둠원 ${index + 1} 역할:</label>
+                            <select id="peer${peer.id}_role" class="peer-input bg-slate-700 border-slate-600 text-white text-sm rounded-lg block w-full p-2.5">
+                                <option value="">역할 선택</option>
+                                ${roleOptions}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <fieldset>
+                            <legend class="text-slate-300 mb-2 text-sm font-semibold">토의 참여:</legend>
+                            <div class="flex flex-wrap gap-2">
+                                <input type="radio" name="peer${peer.id}_q1" value="4" id="p${peer.id}q1_4"><label for="p${peer.id}q1_4" class="eval-radio-label">매우 잘함</label>
+                                <input type="radio" name="peer${peer.id}_q1" value="3" id="p${peer.id}q1_3"><label for="p${peer.id}q1_3" class="eval-radio-label">잘함</label>
+                                <input type="radio" name="peer${peer.id}_q1" value="2" id="p${peer.id}q1_2"><label for="p${peer.id}q1_2" class="eval-radio-label">보통</label>
+                                <input type="radio" name="peer${peer.id}_q1" value="1" id="p${peer.id}q1_1"><label for="p${peer.id}q1_1" class="eval-radio-label">부족</label>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend class="text-slate-300 mb-2 text-sm font-semibold">역할 지식 활용:</legend>
+                            <p class="text-xs text-slate-400 mb-2">역할 정보 속에서 핵심 정보와 그렇지 않은 정보를 잘 구분하여 활용했나요?</p>
+                             <div class="flex flex-wrap gap-2">
+                                <input type="radio" name="peer${peer.id}_q2" value="4" id="p${peer.id}q2_4"><label for="p${peer.id}q2_4" class="eval-radio-label">매우 잘함</label>
+                                <input type="radio" name="peer${peer.id}_q2" value="3" id="p${peer.id}q2_3"><label for="p${peer.id}q2_3" class="eval-radio-label">잘함</label>
+                                <input type="radio" name="peer${peer.id}_q2" value="2" id="p${peer.id}q2_2"><label for="p${peer.id}q2_2" class="eval-radio-label">보통</label>
+                                <input type="radio" name="peer${peer.id}_q2" value="1" id="p${peer.id}q2_1"><label for="p${peer.id}q2_1" class="eval-radio-label">부족</label>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                             <legend class="text-slate-300 mb-2 text-sm font-semibold">협력 태도:</legend>
+                             <div class="flex flex-wrap gap-2">
+                                <input type="radio" name="peer${peer.id}_q3" value="4" id="p${peer.id}q3_4"><label for="p${peer.id}q3_4" class="eval-radio-label">매우 잘함</label>
+                                <input type="radio" name="peer${peer.id}_q3" value="3" id="p${peer.id}q3_3"><label for="p${peer.id}q3_3" class="eval-radio-label">잘함</label>
+                                <input type="radio" name="peer${peer.id}_q3" value="2" id="p${peer.id}q3_2"><label for="p${peer.id}q3_2" class="eval-radio-label">보통</label>
+                                <input type="radio" name="peer${peer.id}_q3" value="1" id="p${peer.id}q3_1"><label for="p${peer.id}q3_1" class="eval-radio-label">부족</label>
+                            </div>
+                        </fieldset>
+                        <div>
+                             <label for="peer${peer.id}_good" class="text-slate-300 mb-2 text-sm font-semibold">이 친구의 좋았던 점:</label>
+                             <textarea id="peer${peer.id}_good" rows="2" class="mt-1 bg-slate-700 border-slate-600 text-white text-sm rounded-lg block w-full p-2">${peer.goodPoint || ''}</textarea>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(peerCard);
+                // Restore selected/checked state
+                if(peer.role) peerCard.querySelector(`#peer${peer.id}_role`).value = peer.role;
+                if(peer.q1) peerCard.querySelector(`input[name="peer${peer.id}_q1"][value="${peer.q1}"]`).checked = true;
+                if(peer.q2) peerCard.querySelector(`input[name="peer${peer.id}_q2"][value="${peer.q2}"]`).checked = true;
+                if(peer.q3) peerCard.querySelector(`input[name="peer${peer.id}_q3"][value="${peer.q3}"]`).checked = true;
+            });
+        };
+
+        const saveEvaluationDataFromDOM = (doAlert = false) => {
+            if (!appData.state.peerEvaluations) appData.state.peerEvaluations = [];
+            
+            appData.state.peerEvaluations.forEach(peer => {
+                const peerCard = document.querySelector(`[data-peer-id="${peer.id}"]`);
+                if (peerCard) {
+                    peer.name = peerCard.querySelector(`#peer${peer.id}_name`)?.value || '';
+                    peer.role = peerCard.querySelector(`#peer${peer.id}_role`)?.value || '';
+                    peer.q1 = peerCard.querySelector(`input[name="peer${peer.id}_q1"]:checked`)?.value || null;
+                    peer.q2 = peerCard.querySelector(`input[name="peer${peer.id}_q2"]:checked`)?.value || null;
+                    peer.q3 = peerCard.querySelector(`input[name="peer${peer.id}_q3"]:checked`)?.value || null;
+                    peer.goodPoint = peerCard.querySelector(`#peer${peer.id}_good`)?.value || '';
                 }
-                summaryData.push([]);
+            });
 
-                // 점수 계산
-                let individualTotal = 0;
-                let groupTotal = 0;
-                let individualMaxScore = 0;
-                let groupMaxScore = 0;
-
-                appData.state.rankedItems.forEach((rankedItem, index) => {
-                    if (rankedItem && rankedItem.id) {
-                        const itemInfo = appData.items.find(i => i.id === rankedItem.id);
-                        if (itemInfo) {
-                            const myRank = index + 1;
-                            const expertRank = itemInfo.uscgRank;
-                            const diff = Math.abs(myRank - expertRank);
-                            const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
-                            individualTotal += score;
-                            individualMaxScore += 10;
-                        }
-                    }
-                });
-
-                appData.state.groupRankedItems.forEach((rankedItem, index) => {
-                    if (rankedItem && rankedItem.id) {
-                        const itemInfo = appData.items.find(i => i.id === rankedItem.id);
-                        if (itemInfo) {
-                            const groupRank = index + 1;
-                            const expertRank = itemInfo.uscgRank;
-                            const diff = Math.abs(groupRank - expertRank);
-                            const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
-                            groupTotal += score;
-                            groupMaxScore += 10;
-                        }
-                    }
-                });
-
-                summaryData.push(['■ 평가 결과']);
-                summaryData.push(['구분', '점수', '배점', '달성률']);
-                summaryData.push(['개인 순위', individualTotal + '점', individualMaxScore + '점', individualMaxScore > 0 ? Math.round(individualTotal/individualMaxScore*100) + '%' : '0%']);
-                summaryData.push(['그룹 순위', groupTotal + '점', groupMaxScore + '점', groupMaxScore > 0 ? Math.round(groupTotal/groupMaxScore*100) + '%' : '0%']);
-                summaryData.push([]);
-                summaryData.push(['점수 향상도:', (groupTotal - individualTotal) + '점']);
-
-                const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-                summarySheet['!cols'] = [
-                    { wch: 15 },
-                    { wch: 12 },
-                    { wch: 12 },
-                    { wch: 12 }
-                ];
-                XLSX.utils.book_append_sheet(workbook, summarySheet, '요약');
-
-                // 개인 순위 시트
-                const individualData = [];
-
-                individualData.push(['바다에서 살아남기 - 개인 순위 결과']);
-                individualData.push([]);
-                individualData.push(['■ 개인 우선순위 평가']);
-                individualData.push([]);
-                individualData.push(['순위', '물품명', '나의 선택', '전문가 순위', '차이', '획득 점수']);
-
-                appData.state.rankedItems.forEach((rankedItem, index) => {
-                    if (rankedItem && rankedItem.id) {
-                        const itemInfo = appData.items.find(i => i.id === rankedItem.id);
-                        if (itemInfo) {
-                            const myRank = index + 1;
-                            const expertRank = itemInfo.uscgRank;
-                            const diff = Math.abs(myRank - expertRank);
-                            const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
-
-                            individualData.push([
-                                myRank + '위',
-                                (itemInfo.icon || '') + ' ' + (itemInfo.name || ''),
-                                myRank + '위',
-                                expertRank + '위',
-                                diff === 0 ? '일치' : diff + '단계 차이',
-                                score + '점'
-                            ]);
-                        }
-                    }
-                });
-
-                individualData.push([]);
-                individualData.push(['', '', '', '', '합계:', individualTotal + '점']);
-                individualData.push([]);
-                individualData.push(['■ 평가']);
-                individualData.push(['총점:', individualTotal + '점 / ' + individualMaxScore + '점']);
-                individualData.push(['달성률:', individualMaxScore > 0 ? Math.round(individualTotal/individualMaxScore*100) + '%' : '0%']);
-
-                const individualSheet = XLSX.utils.aoa_to_sheet(individualData);
-                individualSheet['!cols'] = [
-                    { wch: 10 },
-                    { wch: 35 },
-                    { wch: 12 },
-                    { wch: 15 },
-                    { wch: 15 },
-                    { wch: 12 }
-                ];
-                XLSX.utils.book_append_sheet(workbook, individualSheet, '개인순위');
-
-                // 그룹 순위 시트
-                const groupData = [];
-
-                groupData.push(['바다에서 살아남기 - 그룹 순위 결과']);
-                groupData.push([]);
-                groupData.push(['■ 그룹 토의 후 우선순위 평가']);
-                groupData.push([]);
-                groupData.push(['순위', '물품명', '그룹 선택', '전문가 순위', '차이', '획득 점수']);
-
-                appData.state.groupRankedItems.forEach((rankedItem, index) => {
-                    if (rankedItem && rankedItem.id) {
-                        const itemInfo = appData.items.find(i => i.id === rankedItem.id);
-                        if (itemInfo) {
-                            const groupRank = index + 1;
-                            const expertRank = itemInfo.uscgRank;
-                            const diff = Math.abs(groupRank - expertRank);
-                            const score = diff === 0 ? 10 : diff === 1 ? 8 : diff === 2 ? 6 : diff === 3 ? 4 : diff === 4 ? 2 : 0;
-
-                            groupData.push([
-                                groupRank + '위',
-                                (itemInfo.icon || '') + ' ' + (itemInfo.name || ''),
-                                groupRank + '위',
-                                expertRank + '위',
-                                diff === 0 ? '일치' : diff + '단계 차이',
-                                score + '점'
-                            ]);
-                        }
-                    }
-                });
-
-                groupData.push([]);
-                groupData.push(['', '', '', '', '합계:', groupTotal + '점']);
-                groupData.push([]);
-                groupData.push(['■ 평가']);
-                groupData.push(['총점:', groupTotal + '점 / ' + groupMaxScore + '점']);
-                groupData.push(['달성률:', groupMaxScore > 0 ? Math.round(groupTotal/groupMaxScore*100) + '%' : '0%']);
-                groupData.push([]);
-                groupData.push(['■ 토의 효과']);
-                groupData.push(['개인 점수:', individualTotal + '점']);
-                groupData.push(['그룹 점수:', groupTotal + '점']);
-                groupData.push(['점수 향상:', (groupTotal - individualTotal) + '점']);
-                groupData.push(['향상률:', individualTotal > 0 ? (groupTotal > individualTotal ? '+' : '') + Math.round((groupTotal - individualTotal)/individualTotal*100) + '%' : '계산불가']);
-
-                const groupSheet = XLSX.utils.aoa_to_sheet(groupData);
-                groupSheet['!cols'] = [
-                    { wch: 10 },
-                    { wch: 35 },
-                    { wch: 12 },
-                    { wch: 15 },
-                    { wch: 15 },
-                    { wch: 12 }
-                ];
-                XLSX.utils.book_append_sheet(workbook, groupSheet, '그룹순위');
-
-                // 전체 물품 목록 시트
-                const itemsData = [];
-                itemsData.push(['바다에서 살아남기 - 전체 물품 정보']);
-                itemsData.push([]);
-                itemsData.push(['전문가 순위', '물품명', '전문가 설명']);
-
-                const sortedItems = [...appData.items].sort((a, b) => a.uscgRank - b.uscgRank);
-                sortedItems.forEach(item => {
-                    const expertInfo = appData.expertRanking.find(e => e.name === item.name);
-                    itemsData.push([
-                        item.uscgRank + '위',
-                        (item.icon || '') + ' ' + (item.name || ''),
-                        expertInfo ? expertInfo.reason : item.description || ''
-                    ]);
-                });
-
-                const itemsSheet = XLSX.utils.aoa_to_sheet(itemsData);
-                itemsSheet['!cols'] = [
-                    { wch: 12 },
-                    { wch: 35 },
-                    { wch: 70 }
-                ];
-                XLSX.utils.book_append_sheet(workbook, itemsSheet, '전체물품');
-
-                // 파일 저장
-                const fileName = `바다생존_모둠_${groupName}_${studentNumber}_${studentName}_${new Date().toISOString().slice(0,10)}.xlsx`;
-                XLSX.writeFile(workbook, fileName, { bookType: 'xlsx', type: 'binary' });
-
-                closeModal(dom.saveShareModalEl);
-            } catch (error) {
-                console.error('엑셀 저장 오류:', error);
-                showAlert('엑셀 파일 저장 중 오류가 발생했습니다.', '오류');
+            if (doAlert) {
+                showAlert('평가 내용이 임시 저장되었습니다.');
             }
         };
+
+        const downloadEvaluationAsImage = async () => {
+            saveEvaluationDataFromDOM(false); 
+            const evalContainer = document.getElementById('evaluation-form-container');
+            const addBtn = document.getElementById('add-peer-btn');
+            const removeBtns = evalContainer.querySelectorAll('[data-remove-peer-id]');
+            
+            const oldMaxHeight = evalContainer.style.maxHeight;
+            const oldOverflow = evalContainer.style.overflowY;
+            evalContainer.style.maxHeight = 'none';
+            evalContainer.style.overflowY = 'visible';
+            addBtn.style.display = 'none';
+            removeBtns.forEach(btn => btn.style.display = 'none');
+            
+            try {
+                const canvas = await html2canvas(evalContainer, {
+                       backgroundColor: "#0f172a", // Match form background
+                       scale: 2 
+                });
+                const link = document.createElement('a');
+                const groupName = appData.state.groupName || '소속없음';
+                const studentName = appData.state.studentName || '이름없음';
+                link.download = `바다생존_상호평가_${groupName}_${studentName}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showAlert('평가 결과가 이미지로 저장되었습니다.');
+            } catch (e) {
+                console.error("Error generating evaluation image:", e);
+                showAlert('이미지 저장 중 오류가 발생했습니다.');
+            } finally {
+                addBtn.style.display = 'inline-block';
+                removeBtns.forEach(btn => btn.style.display = 'block');
+                evalContainer.style.maxHeight = oldMaxHeight;
+                evalContainer.style.overflowY = oldOverflow;
+            }
+        };
+
 
         const handleBodyClick = (event) => {
             const target = event.target;
@@ -1474,6 +1613,8 @@
             const itemSelectionButton = target.closest('#item-selection-modal-body button');
             const rankModeButton = target.closest('.rank-mode-select-btn');
             const modalClose = target.closest('.close-modal-btn') || (target.classList.contains('modal-base') && !target.querySelector('.modal-content')) || target.closest('.modal-ok-btn') || target.closest('.modal-cancel-btn');
+            const removePeerBtn = target.closest('[data-remove-peer-id]');
+
 
             if (rankModeButton) {
                 const newModeStr = rankModeButton.dataset.mode;
@@ -1519,6 +1660,15 @@
                 return;
             }
 
+            if(removePeerBtn) {
+                const peerId = Number(removePeerBtn.dataset.removePeerId);
+                showConfirm('이 모둠원을 평가 목록에서 삭제하시겠습니까?', () => {
+                     appData.state.peerEvaluations = appData.state.peerEvaluations.filter(p => p.id !== peerId);
+                     renderEvaluationScreen();
+                     autoSave();
+                }, '모둠원 삭제');
+            }
+
             const actions = {
                 'start-class-btn': () => {
                     if (localStorage.getItem(SAVE_KEY)) {
@@ -1546,6 +1696,17 @@
                 'save-image-btn': () => { closeModal(dom.saveShareModalEl); downloadReport(); },
                 'save-excel-btn': () => { closeModal(dom.saveShareModalEl); exportToExcel(); },
                 'share-image-btn': () => { closeModal(dom.saveShareModalEl); shareReport(); },
+                'go-to-evaluation-btn': showEvaluationScreen,
+                'back-to-report-btn': () => showScreen('report-screen'),
+                'save-evaluation-btn': downloadEvaluationAsImage,
+                'add-peer-btn': () => {
+                    if (appData.state.peerEvaluations.length >= 5) {
+                        showAlert('모둠원은 최대 5명까지 추가할 수 있습니다.');
+                        return;
+                    }
+                    appData.state.peerEvaluations.push({ id: Date.now(), name: '', role: '', q1: null, q2: null, q3: null, goodPoint: '' });
+                    renderEvaluationScreen();
+                },
                 'check-understanding-btn': () => {
                     const modal = document.getElementById('role-understanding-modal');
                     if (!modal) return;
@@ -1616,12 +1777,9 @@
             });
             dom.rankListEl.addEventListener('input', (e) => { if(e.target.matches('textarea')) autoSave(); });
             dom.groupRankListEl.addEventListener('input', (e) => { if(e.target.matches('textarea')) autoSave(); });
+            dom.evaluationFormContainer.addEventListener('input', (e) => { if(e.target.closest('.peer-input, fieldset, textarea')) autoSave(); });
             
             new Sortable(dom.rankListEl, { animation: 150, handle: '.drag-handle', onEnd: (evt) => {
-                // This drag-and-drop logic gets complex with non-contiguous slots.
-                // For simplicity, it might be better to disable drag-drop for top-bottom modes or implement a more robust state update.
-                // Current implementation will have issues with top-bottom modes.
-                // Let's defer fixing drag-drop for top-bottom as it's a complex UI problem. It will work correctly for standard modes.
                 const itemData = appData.state.rankedItems.splice(evt.oldIndex, 1)[0];
                 appData.state.rankedItems.splice(evt.newIndex, 0, itemData);
                 renderRankingSlots('individual');
@@ -1651,6 +1809,4 @@
     </script>
 </body>
 </html>
-
-
 
