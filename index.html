@@ -25,7 +25,7 @@
         body {
             font-family: 'Noto Sans KR', sans-serif;
             color: #e6f1ff;
-            background-image: linear-gradient(to top, rgba(3, 7, 18, 0.9), rgba(3, 7, 18, 1)), url('https://www.transparenttextures.com/patterns/wavecut.png');
+            background-image: linear-gradient(to top, rgba(3, 7, 18, 0.9), rgba(3, 7, 18, 1));
         }
         #app-wrapper {
             width: 100%;
@@ -1397,7 +1397,7 @@
 
                 summaryEl.innerHTML = `
                     <div class="flex flex-col items-center gap-3">
-                        <img src="${category.img}" alt="결과 이미지" class="w-24 h-24 object-cover rounded-lg bg-slate-700" onerror="this.onerror=null;this.src='https://placehold.co/96x96/1e293b/94a3b8?text=Error';">
+                        <img src="${category.img}" alt="결과 이미지" class="w-24 h-24 object-cover rounded-lg bg-slate-700">
                         <div class="text-center">
                             <p class="text-lg font-bold">총점: <span class="text-red-400">${totalScore}점</span> ${modeDescription}</p>
                             <p class="text-sm mt-1 text-slate-300">"${evaluation}"</p>
@@ -2046,7 +2046,7 @@
             const roleContainer = document.querySelector('#role-screen .grid');
             roleContainer.innerHTML = Object.keys(appData.roles).map(key => {
                 const role = appData.roles[key];
-                return `<div data-role="${key}" class="role-card bg-slate-800 p-3 sm:p-4 rounded-lg text-center cursor-pointer hover:bg-slate-700 hover:scale-105 transition-all overflow-hidden"><img src="${role.imageUrl}" alt="${role.name}" class="w-full aspect-square object-cover bg-slate-700 rounded-md" onerror="this.onerror=null;this.src='https://placehold.co/400x400/1e293b/94a3b8?text=Image+Error';"><div class="pt-2 sm:pt-4"><h3 class="text-lg sm:text-xl font-bold">${role.name}</h3><p class="text-slate-400 text-sm break-keep mt-1">${role.description}</p></div></div>`;
+                return `<div data-role="${key}" class="role-card bg-slate-800 p-3 sm:p-4 rounded-lg text-center cursor-pointer hover:bg-slate-700 hover:scale-105 transition-all overflow-hidden"><img src="${role.imageUrl}" alt="${role.name}" class="w-full aspect-square object-cover bg-slate-700 rounded-md"><div class="pt-2 sm:pt-4"><h3 class="text-lg sm:text-xl font-bold">${role.name}</h3><p class="text-slate-400 text-sm break-keep mt-1">${role.description}</p></div></div>`;
             }).join('');
 
             dom.fullscreenBtn.addEventListener('click', toggleFullScreen);
