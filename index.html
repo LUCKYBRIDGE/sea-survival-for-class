@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -404,6 +404,9 @@
                         </button>
                         <button type="button" id="group-excel-template-btn" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition">
                             양식 다운로드
+                        </button>
+                        <button type="button" id="group-excel-google-btn" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2 px-4 rounded-lg transition">
+                            스프레드시트에서 작성하기
                         </button>
                     </div>
                     <p id="group-excel-status" class="text-xs text-slate-400 break-keep">
@@ -1964,6 +1967,10 @@
                 'view-individual-rank-btn': openIndividualRankViewModal,
                 'group-excel-upload-btn': () => dom.groupExcelUploadInput?.click(),
                 'group-excel-template-btn': downloadGroupExcelTemplate,
+                'group-excel-google-btn': () => {
+                    if (dom.groupExcelStatus) dom.groupExcelStatus.textContent = '구글 스프레드시트가 새 탭에서 열립니다.';
+                    window.open('https://docs.google.com/spreadsheets/d/1yJh-hozfB46-fKsPKCg_nm6w5D5xphzs5iAqu-Bgkh4/edit?gid=1075451680', '_blank', 'noopener');
+                },
                 'back-to-individual-ranking-btn': () => {
                     renderRankingSlots('individual');
                     showScreen('main-screen');
