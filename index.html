@@ -864,6 +864,7 @@
         
         // --- All Functions Defined Here ---
         const saveState = () => {
+            if (!appData.state?.hasStarted) return;
             try {
                 if (appData.state && appData.state.currentScreen) {
                     const sanitized = sanitizeState({ ...appData.state, version: APP_VERSION });
@@ -885,6 +886,7 @@
             groupRankedItems: Array(15).fill(null),
             peerEvaluations: [],
             evaluationData: null,
+            hasStarted: false,
         });
         
         const ensureRankedItemsStructure = (items) => {
@@ -933,6 +935,7 @@
                 groupRankedItems: ensureRankedItemsStructure(rawState.groupRankedItems),
                 peerEvaluations: sanitizePeerEvaluations(rawState.peerEvaluations),
                 evaluationData: rawState.evaluationData ?? null,
+                hasStarted: rawState.hasStarted !== undefined ? Boolean(rawState.hasStarted) : true,
             };
         };
 
@@ -1136,6 +1139,7 @@
                 showAlert('소속, 번호, 이름을 모두 입력/선택해주세요!');
                 return;
             }
+            appData.state.hasStarted = true;
             saveState();
             showEmergencySequence();
         };
