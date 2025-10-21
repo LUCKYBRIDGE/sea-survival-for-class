@@ -155,12 +155,12 @@
         }
         input[type="radio"]:checked + .eval-radio-label,
         input[type="checkbox"]:checked + .eval-checkbox-label {
-            background-color: #0e7490; /* cyan-700 */
-            color: white;
-            font-weight: bold;
+             background-color: #0e7490; /* cyan-700 */
+             color: white;
+             font-weight: bold;
         }
         input[type="radio"], input[type="checkbox"] {
-            display: none;
+             display: none;
         }
     </style>
 </head>
@@ -220,7 +220,7 @@
             <div id="setup-screen" class="screen text-center">
                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">승선자 정보 입력</h1>
                  <p class="text-base sm:text-lg md:text-xl text-slate-300 mb-8 max-w-3xl mx-auto break-keep">
-                        당신의 소속과 정보를 입력해주세요.
+                      당신의 소속과 정보를 입력해주세요.
                  </p>
                 <div class="max-w-sm mx-auto mb-8 space-y-4">
                     <div>
@@ -321,9 +321,9 @@
                    <!-- Ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
-                     <button id="finish-individual-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                         개인 순위 제출하기 <span id="finish-individual-button-counter">(0/15)</span>
-                     </button>
+                      <button id="finish-individual-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                           개인 순위 제출하기 <span id="finish-individual-button-counter">(0/15)</span>
+                      </button>
                  </div>
             </div>
 
@@ -368,9 +368,14 @@
                             </div>
                         </div>
                     </div>
-                    <button id="go-to-group-ranking-btn" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
-                        모둠 토의 시작하기
-                    </button>
+                    <div class="text-center mt-8 flex flex-col sm:flex-row sm:justify-center gap-4">
+                        <button id="back-to-individual-ranking-btn" class="w-full sm:w-auto bg-gray-600 hover:bg-gray-700 text-white font-bold text-lg py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                            개인 순위 수정하기
+                        </button>
+                        <button id="go-to-group-ranking-btn" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105">
+                            모둠 토의 시작하기
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -378,21 +383,40 @@
             <div id="group-ranking-screen" class="screen">
                 <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                     <h2 class="text-2xl sm:text-3xl font-bold text-center flex-grow">[모둠] 생존 물품 우선순위 정하기</h2>
-                     <button id="open-knowledge-modal-btn-group" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm flex-shrink-0">
-                         내 정보 다시보기 🧠
-                     </button>
+                    <div class="flex-shrink-0 flex gap-2">
+                        <button id="view-individual-rank-btn" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-lg text-sm">
+                            내 순위 보기 📋
+                        </button>
+                        <button id="open-knowledge-modal-btn-group" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm">
+                            내 정보 다시보기 🧠
+                        </button>
+                    </div>
                 </div>
                 <!-- ADDED: Tip box for group ranking -->
                 <div class="max-w-3xl mx-auto mb-4 p-3 bg-sky-900/50 border border-sky-700 rounded-lg text-sky-300 text-sm break-keep text-center">
                     <p>💡 <b>토의 Tip:</b> 모둠원의 다양한 전문 지식을 종합하면 더 나은 결정을 내릴 수 있습니다. 적극적으로 의견을 나누고 최선의 순위를 함께 만들어보세요.</p>
                 </div>
+                <div class="max-w-3xl mx-auto mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex flex-wrap gap-2">
+                        <input type="file" id="group-excel-upload-input" accept=".xlsx,.xls,.xlsm" class="hidden">
+                        <button type="button" id="group-excel-upload-btn" class="bg-lime-600 hover:bg-lime-500 text-white font-semibold py-2 px-4 rounded-lg transition">
+                            엑셀에서 불러오기
+                        </button>
+                        <button type="button" id="group-excel-template-btn" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition">
+                            양식 다운로드
+                        </button>
+                    </div>
+                    <p id="group-excel-status" class="text-xs text-slate-400 break-keep">
+                        A열에 순위(1~15), B열에 물품 이름, C열에 이유를 입력한 뒤 업로드하세요.
+                    </p>
+                </div>
                 <div id="group-rank-list" class="w-full bg-slate-900 p-4 rounded-lg min-h-[55vh] space-y-3 max-h-[70vh] overflow-y-auto">
                     <!-- Group ranking slots will be generated here -->
                 </div>
                  <div class="text-center mt-8">
-                     <button id="finish-group-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
-                         최종 보고서 만들기 <span id="finish-group-button-counter">(0/15)</span>
-                     </button>
+                      <button id="finish-group-button" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-lg sm:text-xl py-3 px-8 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>
+                           최종 보고서 만들기 <span id="finish-group-button-counter">(0/15)</span>
+                      </button>
                  </div>
             </div>
 
@@ -430,10 +454,10 @@
                         </div>
                     </div>
                 </div>
-                 <div class="text-center mt-6 flex flex-col sm:flex-row sm:justify-center gap-2 sm:gap-4 flex-wrap">
-                     <button id="open-save-share-modal-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
-                         결과 저장하기
-                     </button>
+                  <div class="text-center mt-6 flex flex-col sm:flex-row sm:justify-center gap-2 sm:gap-4 flex-wrap">
+                       <button id="open-save-share-modal-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
+                            결과 저장하기
+                       </button>
                     <a href="https://blog.naver.com/pinkylucky7/223980374740" target="_blank" rel="noopener noreferrer" class="inline-block w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold text-lg py-3 px-6 rounded-lg transition">
                         전문가 해설 보기
                     </a>
@@ -443,7 +467,7 @@
                     <button id="restart-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold text-lg py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
                         다시하기
                     </button>
-                 </div>
+                  </div>
             </div>
 
             <!-- Screen 7: Peer Evaluation Screen -->
@@ -546,18 +570,18 @@
                         <div class="bg-slate-800/50 p-4 sm:p-6 rounded-lg">
                              <h3 class="text-xl font-bold text-purple-300 mb-4">📝 활동 소감</h3>
                              <div class="space-y-4">
-                                 <div>
-                                    <label for="reflection-good" class="block text-slate-300 mb-2 font-semibold">오늘 활동에서 가장 좋았던 점은?</label>
-                                    <textarea id="reflection-good" rows="3" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"></textarea>
-                                 </div>
-                                 <div>
-                                    <label for="reflection-felt" class="block text-slate-300 mb-2 font-semibold">친구들과 함께 활동하면서 느낀 점은?</label>
-                                    <textarea id="reflection-felt" rows="3" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"></textarea>
-                                 </div>
-                                 <div>
-                                    <label for="reflection-improve" class="block text-slate-300 mb-2 font-semibold">다음에 더 잘하고 싶은 점은?</label>
-                                    <textarea id="reflection-improve" rows="3" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"></textarea>
-                                 </div>
+                                  <div>
+                                     <label for="reflection-good" class="block text-slate-300 mb-2 font-semibold">오늘 활동에서 가장 좋았던 점은?</label>
+                                     <textarea id="reflection-good" rows="3" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"></textarea>
+                                  </div>
+                                  <div>
+                                     <label for="reflection-felt" class="block text-slate-300 mb-2 font-semibold">친구들과 함께 활동하면서 느낀 점은?</label>
+                                     <textarea id="reflection-felt" rows="3" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"></textarea>
+                                  </div>
+                                  <div>
+                                     <label for="reflection-improve" class="block text-slate-300 mb-2 font-semibold">다음에 더 잘하고 싶은 점은?</label>
+                                     <textarea id="reflection-improve" rows="3" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5"></textarea>
+                                  </div>
                              </div>
                         </div>
                     </div>
@@ -662,6 +686,17 @@
         </div>
     </div>
 
+    <!-- Individual Rank View Modal -->
+    <div id="individual-rank-view-modal" class="modal-base">
+        <div class="modal-content bg-slate-900 rounded-lg border border-slate-700">
+            <span class="close-modal-btn absolute top-4 right-5 text-3xl font-bold cursor-pointer hover:text-red-500">&times;</span>
+            <h3 class="text-2xl font-bold mb-4 text-center text-yellow-300">나의 생존 계획 (개인 순위)</h3>
+            <div id="individual-rank-view-body" class="max-h-[60vh] overflow-y-auto p-2 space-y-2">
+                <!-- Content will be injected by JS -->
+            </div>
+        </div>
+    </div>
+
     <audio id="bg-music" loop></audio>
 
     <!-- Role Understanding Modal -->
@@ -698,9 +733,14 @@
                 <div id="understanding-feedback" class="mb-4">
                     <p class="text-slate-400 text-sm">정답 선택: <span id="correct-count">0</span>/2</p>
                 </div>
-                <button id="check-understanding-btn" class="bg-gray-500 text-white font-bold py-2 px-8 rounded-lg cursor-not-allowed" disabled>
-                    다시 확인해주세요
-                </button>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button id="reselect-role-btn" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-6 rounded-lg transition-all">
+                        역할 다시 선택하기
+                    </button>
+                    <button id="check-understanding-btn" class="bg-gray-500 text-white font-bold py-2 px-8 rounded-lg cursor-not-allowed" disabled>
+                        다시 확인해주세요
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -708,8 +748,8 @@
     <script>
     (function() {
         // --- App State and Data ---
-        const SAVE_KEY = 'sea-survival-team-v1.3'; // Version bump for new evaluation state
-        const APP_VERSION = 'sea-team-1.3';
+        const SAVE_KEY = 'sea-survival-team-v1.4'; // Version bump for new features
+        const APP_VERSION = 'sea-team-1.4';
 
         let emergencySequenceTimeoutId = null;
         let activeSelectionContext = { type: null, slotIndex: null };
@@ -726,10 +766,10 @@
                 "반드시... 반드시 살아남아라!"
             ],
             roles: {
-                influencer: { name: '💅 SNS 인플루언서', imageUrl: 'influencer.png', description: "어떤 상황에서도 '좋아요'를 부르는 감각을 가졌습니다.", info: [ "반짝이는 물건으로 햇빛을 반사시키면, 아주 멀리 있는 사람의 시선도 사로잡을 수 있다.", "탈수는 피부 노화의 지름길이다.", "단 음식은 우울한 기분을 잠시나마 달래주는 효과가 있다.", "강한 햇볕을 직접 쬐는 것은 탈수를 가속시키므로, 그늘을 만들어 몸을 보호하는 것이 중요하다.", "어떤 상황에서든 '스토리'가 있는 아이템이 주목받는다.", "요즘은 바다 한가운데서도 라이브 방송을 하는 게 트렌드다." ] },
-                trainer: { name: '💪 헬스 트레이너', imageUrl: 'trainer.png', description: "인체의 한계와 신체 능력 유지에 대한 지식이 있습니다.", info: [ "알코올은 피부 근처의 혈관을 확장시켜, 몸의 열을 바깥으로 더 빨리 빠져나가게 만든다.", "몸이 젖어 있으면, 마른 상태일 때보다 체온이 20배 이상 빠르게 떨어질 수 있다.", "가만히 있어도 우리 몸의 수분은 계속해서 빠져나간다.", "설탕은 에너지를 빨리 내게 하지만, 효과가 오래가지는 않는다.", "상처가 바닷물에 노출되면 감염 위험이 매우 크다.", "장기간의 수영은 심폐지구력 향상에 최고의 운동이다." ] },
-                angler: { name: '🎣 낚시광', imageUrl: 'angler.png', description: "바다와 물고기에 대한 풍부한 실전 경험을 가졌습니다.", info: [ "아주 작은 물고기라도 잡을 수 있다면, 그것을 미끼로 사용해 더 큰 고기를 노려볼 수 있다.", "바다에 강한 냄새를 풍기면, 멀리 있는 물고기들을 주변으로 유인하는 효과가 있다.", "대부분의 어류 체액은 바닷물보다 염도가 낮다.", "상어는 피 냄새뿐만 아니라, 물속의 부자연스러운 진동에도 매우 민감하게 반응한다.", "바다에서는 작은 부유물이라도 주변에 물고기들이 모여들기 마련이다.", "전설적인 '청새치'는 자동차보다도 빠르게 헤엄칠 수 있다." ] },
-                diy: { name: '🛠️ DIY 취미가', imageUrl: 'diy.png', description: "주어진 도구로 무엇이든 만들어내는 손재주가 있습니다.", info: [ "렌즈를 이용해 햇빛을 한 점으로 모으면, 그 지점은 종이를 태울 만큼 뜨거워질 수 있다.", "간단한 전자제품을 분해하면, 낚싯바늘이나 작은 도구로 쓸만한 예상치 못한 부품을 얻을 수 있다.", "나일론 같은 합성 밧줄은 열을 가하면 녹는 성질이 있어, 올이 풀리는 것을 막는 데 쓸 수 있다.", "대부분의 플라스틱과 기름은 물보다 밀도가 낮다.", "모든 재료는 분해하고 다시 조립할 수 있다.", "잘 만든 연은 1,000미터 이상까지도 날릴 수 있다." ] }
+                influencer: { name: '💅 SNS 인플루언서', imageUrl: '../Survival/sea-survival/influencer.png', description: "어떤 상황에서도 '좋아요'를 부르는 감각을 가졌습니다.", info: [ "반짝이는 물건으로 햇빛을 반사시키면, 아주 멀리 있는 사람의 시선도 사로잡을 수 있다.", "탈수는 피부 노화의 지름길이다.", "단 음식은 우울한 기분을 잠시나마 달래주는 효과가 있다.", "강한 햇볕을 직접 쬐는 것은 탈수를 가속시키므로, 그늘을 만들어 몸을 보호하는 것이 중요하다.", "어떤 상황에서든 '스토리'가 있는 아이템이 주목받는다.", "요즘은 바다 한가운데서도 라이브 방송을 하는 게 트렌드다." ] },
+                trainer: { name: '💪 헬스 트레이너', imageUrl: '../Survival/sea-survival/trainer.png', description: "인체의 한계와 신체 능력 유지에 대한 지식이 있습니다.", info: [ "알코올은 피부 근처의 혈관을 확장시켜, 몸의 열을 바깥으로 더 빨리 빠져나가게 만든다.", "몸이 젖어 있으면, 마른 상태일 때보다 체온이 20배 이상 빠르게 떨어질 수 있다.", "가만히 있어도 우리 몸의 수분은 계속해서 빠져나간다.", "설탕은 에너지를 빨리 내게 하지만, 효과가 오래가지는 않는다.", "상처가 바닷물에 노출되면 감염 위험이 매우 크다.", "장기간의 수영은 심폐지구력 향상에 최고의 운동이다." ] },
+                angler: { name: '🎣 낚시광', imageUrl: '../Survival/sea-survival/angler.png', description: "바다와 물고기에 대한 풍부한 실전 경험을 가졌습니다.", info: [ "아주 작은 물고기라도 잡을 수 있다면, 그것을 미끼로 사용해 더 큰 고기를 노려볼 수 있다.", "바다에 강한 냄새를 풍기면, 멀리 있는 물고기들을 주변으로 유인하는 효과가 있다.", "대부분의 어류 체액은 바닷물보다 염도가 낮다.", "상어는 피 냄새뿐만 아니라, 물속의 부자연스러운 진동에도 매우 민감하게 반응한다.", "바다에서는 작은 부유물이라도 주변에 물고기들이 모여들기 마련이다.", "전설적인 '청새치'는 자동차보다도 빠르게 헤엄칠 수 있다." ] },
+                diy: { name: '🛠️ DIY 취미가', imageUrl: '../Survival/sea-survival/diy.png', description: "주어진 도구로 무엇이든 만들어내는 손재주가 있습니다.", info: [ "렌즈를 이용해 햇빛을 한 점으로 모으면, 그 지점은 종이를 태울 만큼 뜨거워질 수 있다.", "간단한 전자제품을 분해하면, 낚싯바늘이나 작은 도구로 쓸만한 예상치 못한 부품을 얻을 수 있다.", "나일론 같은 합성 밧줄은 열을 가하면 녹는 성질이 있어, 올이 풀리는 것을 막는 데 쓸 수 있다.", "대부분의 플라스틱과 기름은 물보다 밀도가 낮다.", "모든 재료는 분해하고 다시 조립할 수 있다.", "잘 만든 연은 1,000미터 이상까지도 날릴 수 있다." ] }
             },
             items: [
                 { id: 1, name: '항해용 각도기', uscgRank: 15, icon: '🧭', description: '별의 각도를 재어 위치를 계산하는 항해용 전문 도구입니다.' },
@@ -747,12 +787,6 @@
                 { id: 13, name: '15m 나일론 밧줄', uscgRank: 8, icon: '🧶', description: '길고 튼튼한 나일론 소재의 밧줄입니다.' },
                 { id: 14, name: '초콜릿 두 상자', uscgRank: 6, icon: '🍫', description: '간식으로 먹을 수 있는 초콜릿입니다.' },
                 { id: 15, name: '낚시 도구 세트', uscgRank: 7, icon: '🎣', description: '낚싯대, 릴, 낚싯줄, 미끼 등이 포함된 세트입니다.' }
-            ],
-            expertRanking: [ // Sample data for Excel export, assuming this data is available
-                { name: '면도용 거울', reason: '가장 중요한 신호 장비. 햇빛을 반사해 구조 항공기나 선박에 위치를 알릴 수 있다.' },
-                { name: '10리터 기름통', reason: '물보다 가벼워 물에 뜨고, 내용물은 불을 피워 신호를 보내는 데 사용할 수 있다.' },
-                { name: '20리터 물통', reason: '탈수는 가장 즉각적인 위협. 생존에 필수적인 식수를 제공한다.' }
-                // ... Add reasons for all items for a complete export
             ],
             state: {}
         };
@@ -783,6 +817,8 @@
             studentNameInput: document.getElementById('studentNameInput'),
             roleTitle: document.getElementById('role-title'),
             knowledgeList: document.getElementById('knowledge-list'),
+            groupExcelUploadInput: document.getElementById('group-excel-upload-input'),
+            groupExcelStatus: document.getElementById('group-excel-status'),
             finishIndividualButton: document.getElementById('finish-individual-button'),
             finishIndividualButtonCounter: document.getElementById('finish-individual-button-counter'),
             finishGroupButton: document.getElementById('finish-group-button'),
@@ -808,39 +844,27 @@
             evalGroupName: document.getElementById('eval-group-name'),
             evalStudentName: document.getElementById('eval-student-name'),
             evalRoleName: document.getElementById('eval-role-name'),
+            // New elements
+            individualRankViewModal: document.getElementById('individual-rank-view-modal'),
+            individualRankViewBody: document.getElementById('individual-rank-view-body'),
         };
         
         // --- All Functions Defined Here ---
         const saveState = () => {
             try {
-                if (['welcome-screen', 'setup-screen', 'emergency-screen'].includes(appData.state.currentScreen)) return;
-
-                const saveReasons = (type) => {
-                    const rankedItems = type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems;
-                    const listEl = type === 'individual' ? dom.rankListEl : dom.groupRankListEl;
-                    const reasonAttribute = type === 'individual' ? 'data-reason-for-item' : 'data-reason-for-group-item';
-
-                    rankedItems.forEach((itemData, index) => {
-                        if (itemData) {
-                            const textarea = listEl.querySelector(`textarea[${reasonAttribute}="${itemData.id}"]`);
-                            if (textarea) rankedItems[index].reason = textarea.value;
-                        }
-                    });
-                };
-                
-                if(appData.state.currentScreen === 'main-screen') saveReasons('individual');
-                if(appData.state.currentScreen === 'group-ranking-screen') saveReasons('group');
-                if(appData.state.currentScreen === 'evaluation-screen') saveEvaluationDataFromDOM(false);
-
-
-                localStorage.setItem(SAVE_KEY, JSON.stringify({ ...appData.state, version: APP_VERSION }));
+                if (appData.state && appData.state.currentScreen) {
+                    const sanitized = sanitizeState({ ...appData.state, version: APP_VERSION });
+                    if (sanitized) {
+                        localStorage.setItem(SAVE_KEY, JSON.stringify(sanitized));
+                    }
+                }
             } catch (e) { console.error("저장 중 오류:", e); }
         };
 
         const autoSave = () => saveState();
         
         const getNewState = () => ({
-            currentScreen: 'setup-screen',
+            currentScreen: 'welcome-screen',
             groupName: '', studentName: '', studentNumber: '',
             selectedRole: null,
             individualRankMode: '15', 
@@ -849,6 +873,74 @@
             peerEvaluations: [],
             evaluationData: null,
         });
+        
+        const ensureRankedItemsStructure = (items) => {
+            const sanitized = Array.isArray(items) ? items.slice(0, 15) : [];
+            const result = sanitized.map((entry) => {
+                if (!entry || typeof entry !== 'object') return null;
+                const id = Number(entry.id);
+                if (!Number.isInteger(id)) return null;
+                return {
+                    id,
+                    reason: entry.reason ? String(entry.reason) : ''
+                };
+            });
+            while (result.length < 15) result.push(null);
+            return result;
+        };
+
+        const sanitizePeerEvaluations = (peers) => {
+            if (!Array.isArray(peers)) return [];
+            return peers.map((peer) => ({
+                id: peer?.id ?? Date.now(),
+                name: peer?.name ? String(peer.name) : '',
+                role: peer?.role ? String(peer.role) : '',
+                q1: peer?.q1 ?? null,
+                q2: peer?.q2 ?? null,
+                q3: peer?.q3 ?? null,
+                goodPoint: peer?.goodPoint ? String(peer.goodPoint) : ''
+            }));
+        };
+
+        const sanitizeState = (rawState) => {
+            if (!rawState || typeof rawState !== 'object') return null;
+            if (rawState.version && rawState.version !== APP_VERSION) return null;
+            const base = getNewState();
+            return {
+                ...base,
+                ...rawState,
+                version: APP_VERSION,
+                currentScreen: rawState.currentScreen || base.currentScreen,
+                groupName: rawState.groupName ? String(rawState.groupName) : '',
+                studentName: rawState.studentName ? String(rawState.studentName) : '',
+                studentNumber: rawState.studentNumber ? String(rawState.studentNumber) : '',
+                selectedRole: rawState.selectedRole || null,
+                individualRankMode: String(rawState.individualRankMode || base.individualRankMode),
+                rankedItems: ensureRankedItemsStructure(rawState.rankedItems),
+                groupRankedItems: ensureRankedItemsStructure(rawState.groupRankedItems),
+                peerEvaluations: sanitizePeerEvaluations(rawState.peerEvaluations),
+                evaluationData: rawState.evaluationData ?? null,
+            };
+        };
+
+        const getSavedStateFromStorage = () => {
+            try {
+                const savedStateJSON = localStorage.getItem(SAVE_KEY);
+                if (!savedStateJSON) return null;
+                const parsed = JSON.parse(savedStateJSON);
+                const sanitized = sanitizeState(parsed);
+                if (!sanitized) {
+                    localStorage.removeItem(SAVE_KEY);
+                    return null;
+                }
+                localStorage.setItem(SAVE_KEY, JSON.stringify({ ...sanitized, version: APP_VERSION }));
+                return sanitized;
+            } catch (error) {
+                console.error('Failed to parse saved state:', error);
+                localStorage.removeItem(SAVE_KEY);
+                return null;
+            }
+        };
         
         const parseRankMode = (mode) => {
             if (typeof mode === 'number') mode = String(mode);
@@ -867,36 +959,31 @@
             const modal = document.getElementById('role-understanding-modal');
             if (!modal) {
                 console.error('Role understanding modal not found');
-                // Fallback to proceed directly if modal not found
                 proceedToKnowledgeScreen();
                 return;
             }
             const checkboxes = modal.querySelectorAll('.understanding-check');
             const checkBtn = document.getElementById('check-understanding-btn');
             const feedback = document.getElementById('understanding-feedback');
-            const correctCount = document.getElementById('correct-count');
+            const correctCountEl = document.getElementById('correct-count');
 
-            // Reset checkboxes
+            // Reset UI
             checkboxes.forEach(cb => {
                 cb.checked = false;
-                cb.parentElement.classList.remove('bg-red-900/30', 'bg-green-900/30');
+                cb.parentElement.classList.remove('bg-red-800/60', 'border-red-500', 'bg-green-800/60', 'border-green-500', 'border-2');
             });
-
-            // Reset button
             checkBtn.textContent = '다시 확인해주세요';
             checkBtn.className = 'bg-gray-500 text-white font-bold py-2 px-8 rounded-lg cursor-not-allowed';
             checkBtn.disabled = true;
 
-            // Update counter
             const updateCounter = () => {
-                const correctlyChecked = Array.from(checkboxes).filter(cb => {
-                    const isCorrect = cb.dataset.correct === 'true';
-                    return (isCorrect && cb.checked) || (!isCorrect && !cb.checked);
-                }).length;
-
-                correctCount.textContent = Math.max(0, correctlyChecked - 2); // Only count correct selections
-
-                if (correctlyChecked === 4) {
+                const correctAnswers = Array.from(checkboxes).filter(cb => cb.dataset.correct === 'true');
+                const selectedCorrectAnswers = correctAnswers.filter(cb => cb.checked).length;
+                const selectedIncorrectAnswers = Array.from(checkboxes).filter(cb => cb.dataset.correct === 'false' && cb.checked).length;
+                
+                correctCountEl.textContent = selectedCorrectAnswers;
+                
+                if (selectedCorrectAnswers === 2 && selectedIncorrectAnswers === 0) {
                     checkBtn.textContent = '이해했습니다! ✅';
                     checkBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-8 rounded-lg transition-all transform hover:scale-105';
                     checkBtn.disabled = false;
@@ -905,29 +992,28 @@
                     checkBtn.textContent = '다시 확인해주세요';
                     checkBtn.className = 'bg-gray-500 text-white font-bold py-2 px-8 rounded-lg cursor-not-allowed';
                     checkBtn.disabled = true;
-                    feedback.innerHTML = `<p class="text-slate-400 text-sm">정답 선택: <span id="correct-count">${Math.max(0, correctlyChecked - 2)}</span>/2</p>`;
+                    feedback.innerHTML = `<p class="text-slate-400 text-sm">정답 선택: <span id="correct-count">${selectedCorrectAnswers}</span>/2</p>`;
                 }
             };
 
-            // Add listeners
             checkboxes.forEach(cb => {
                 cb.addEventListener('change', () => {
                     const isCorrect = cb.dataset.correct === 'true';
+                    const parentLabel = cb.parentElement;
+                    parentLabel.classList.remove('bg-red-800/60', 'border-red-500', 'bg-green-800/60', 'border-green-500', 'border-2');
+                    
                     if (cb.checked) {
                         if (isCorrect) {
-                            cb.parentElement.classList.add('bg-green-900/30');
-                            cb.parentElement.classList.remove('bg-red-900/30');
+                            parentLabel.classList.add('bg-green-800/60', 'border-green-500', 'border-2');
                         } else {
-                            cb.parentElement.classList.add('bg-red-900/30');
-                            cb.parentElement.classList.remove('bg-green-900/30');
+                            parentLabel.classList.add('bg-red-800/60', 'border-red-500', 'border-2');
                         }
-                    } else {
-                        cb.parentElement.classList.remove('bg-red-900/30', 'bg-green-900/30');
                     }
                     updateCounter();
                 });
             });
 
+            updateCounter();
             openModal(modal);
         };
 
@@ -948,10 +1034,9 @@
                 [dom.backToStartBtn, dom.exitAppBtn].forEach(btn => btn.classList.toggle('hidden', isIntro));
             }
             
-            // 화면 전환 시 스크롤 위치를 맨 위로 초기화
-            dom.appWrapper.scrollTop = 0; // 메인 스크롤 초기화
+            // Scroll to top on screen change
+            dom.appWrapper.scrollTop = 0;
             if (activeScreen) {
-                // 화면 내부의 스크롤 가능 영역도 초기화
                 const scrollableChild = activeScreen.querySelector('.overflow-y-auto');
                 if (scrollableChild) {
                     scrollableChild.scrollTop = 0;
@@ -959,7 +1044,7 @@
             }
             
             appData.state.currentScreen = screenId;
-            if (!['welcome-screen', 'setup-screen', 'emergency-screen'].includes(screenId)) saveState();
+            saveState(); // Save state on every screen change
         };
 
         const restartApp = () => {
@@ -969,13 +1054,12 @@
         
         const openModal = (modalEl) => {
             modalEl.classList.remove('hidden');
-            // A short delay to allow the element to be visible before starting the transition
             setTimeout(() => modalEl.classList.add('show'), 10);
         };
         const closeModal = (modalEl) => {
             modalEl.classList.remove('show');
             if (modalEl.classList.contains('modal')) {
-                 setTimeout(() => modalEl.classList.add('hidden'), 200); // Match transition duration
+                 setTimeout(() => modalEl.classList.add('hidden'), 200);
             }
         };
 
@@ -1046,7 +1130,7 @@
         const showEmergencySequence = () => {
             showScreen('emergency-screen');
             if (dom.bgMusic) {
-                dom.bgMusic.src = 'seastorm.mp3'; // Use local audio file
+                dom.bgMusic.src = '../Survival/sea-survival/seastorm.mp3';
                 dom.bgMusic.play().catch(e => console.log("음악 자동 재생이 차단되었습니다.", e));
             }
             dom.emergencyMessageContainer.innerHTML = '';
@@ -1091,6 +1175,7 @@
 
         const selectRole = (roleId) => {
             appData.state.selectedRole = roleId;
+            autoSave(); // Save role selection immediately
             openRoleUnderstandingModal();
         };
 
@@ -1197,11 +1282,12 @@
             dom.finalRole.textContent = (appData.state.selectedRole && appData.roles[appData.state.selectedRole]?.name) || '미정';
 
             const getScoreCategory = (score) => {
-                if (score <= 25) return { img: 'score_excellent.png', class: 'border-emerald-400' };
-                if (score <= 32) return { img: 'score_good.png', class: 'border-sky-400' };
-                if (score <= 45) return { img: 'score_average.png', class: 'border-yellow-400' };
-                if (score <= 55) return { img: 'score_danger.png', class: 'border-amber-500' };
-                return { img: 'score_failure.png', class: 'border-red-500' };
+                const basePath = '../Survival/sea-survival/';
+                if (score <= 25) return { img: `${basePath}score_excellent.png`, class: 'border-emerald-400' };
+                if (score <= 32) return { img: `${basePath}score_good.png`, class: 'border-sky-400' };
+                if (score <= 45) return { img: `${basePath}score_average.png`, class: 'border-yellow-400' };
+                if (score <= 55) return { img: `${basePath}score_danger.png`, class: 'border-amber-500' };
+                return { img: `${basePath}score_failure.png`, class: 'border-red-500' };
             };
 
             const calculateScoreAndRenderList = (type) => {
@@ -1269,14 +1355,15 @@
 
                 // Render list display
                 const validRankedItems = rankedItems.map((itemData, index) => ({...itemData, index}))
-                                                     .filter(itemData => itemData && rankedIndices.has(itemData.index));
+                                                     .filter(itemData => itemData.id && rankedIndices.has(itemData.index));
 
                 listEl.innerHTML = validRankedItems.map(itemData => {
                     const item = appData.items.find(i => i.id === itemData.id);
-                    return `<div class="p-2 bg-slate-800 rounded-md text-sm"><p class="font-bold">${itemData.index + 1}위. ${item.icon} ${item.name}</p><p class="text-sm text-slate-400 mt-1 pl-3 break-keep">이유: ${itemData.reason || '작성하지 않음'}</p></div>`;
+                    const myRank = itemData.index + 1;
+                    return `<div class="p-2 bg-slate-800 rounded-md text-sm"><p class="font-bold">${myRank}위. ${item.icon} ${item.name}</p><p class="text-sm text-slate-400 mt-1 pl-3 break-keep">이유: ${itemData.reason || '작성하지 않음'}</p></div>`;
                 }).join('');
                 
-                if (unrankedItems.length > 0) {
+                if (unrankedItems.length > 0 && modeStr !== '15') {
                     listEl.innerHTML += `<hr class="border-slate-600 my-2"><p class="text-xs text-slate-500 text-center pb-1">-- 순위 미지정 물품 --</p>`;
                     listEl.innerHTML += unrankedItems.map(item => `<div class="p-2 bg-slate-900/50 rounded-md text-sm opacity-60"><p class="font-bold text-slate-400">${item.icon} ${item.name}</p></div>`).join('');
                 }
@@ -1322,35 +1409,27 @@
             openModal(dom.knowledgeModalEl);
         };
         
-        const restoreSession = () => {
-            try {
-                const savedStateJSON = localStorage.getItem(SAVE_KEY);
-                if (!savedStateJSON) return false;
-                
-                const savedState = JSON.parse(savedStateJSON);
-                 if (savedState.version !== APP_VERSION) {
-                       localStorage.removeItem(SAVE_KEY);
-                       return false;
-                 }
+        const restoreSession = (providedState = null) => {
+            const stateToRestore = providedState ? sanitizeState(providedState) : getSavedStateFromStorage();
+            if (!stateToRestore) return false;
 
-                appData.state = savedState;
-                dom.groupNameInput.value = appData.state.groupName || '';
-                dom.studentNumberInput.value = appData.state.studentNumber || '';
-                dom.studentNameInput.value = appData.state.studentName || '';
+            appData.state = stateToRestore;
+            dom.groupNameInput.value = appData.state.groupName || '';
+            dom.studentNumberInput.value = appData.state.studentNumber || '';
+            dom.studentNameInput.value = appData.state.studentName || '';
 
-                const screenToRestore = appData.state.currentScreen;
-                
-                if (screenToRestore === 'main-screen') renderRankingSlots('individual');
-                else if (screenToRestore === 'group-ranking-screen') renderRankingSlots('group');
-                else if (screenToRestore === 'report-screen') generateReport();
-                else if (screenToRestore === 'evaluation-screen') showEvaluationScreen();
-                
-                showScreen(screenToRestore);
-                return true;
-            } catch (e) {
-                localStorage.removeItem(SAVE_KEY);
-                return false;
-            }
+            const screenToRestore = appData.state.currentScreen;
+
+            // Ensure ranking slots are in sync before navigating
+            renderRankingSlots('individual');
+            renderRankingSlots('group');
+
+            if (screenToRestore === 'report-screen') generateReport();
+            else if (screenToRestore === 'evaluation-screen') showEvaluationScreen();
+            else if (document.getElementById(screenToRestore)) showScreen(screenToRestore);
+            else showScreen('welcome-screen');
+
+            return true;
         };
 
         const generateReportCanvas = () => {
@@ -1416,9 +1495,176 @@
             }
         };
 
+        const groupExcelHeaderOptions = {
+            rank: ['순위', 'rank', '우선순위', 'priority'],
+            item: ['물품', '아이템', '항목', 'item'],
+            reason: ['이유', '근거', '사유', 'reason']
+        };
+
+        const normalizeExcelHeader = (value) => String(value ?? '').trim().toLowerCase();
+
+        const parseGroupExcelRows = (rows) => {
+            if (!rows.length) throw new Error('엑셀 데이터가 비어 있습니다.');
+
+            const headers = rows[0].map(normalizeExcelHeader);
+            const findHeaderIndex = (candidates) => headers.findIndex(header => candidates.includes(header));
+
+            const rankIdx = findHeaderIndex(groupExcelHeaderOptions.rank);
+            const itemIdx = findHeaderIndex(groupExcelHeaderOptions.item);
+            const reasonIdx = findHeaderIndex(groupExcelHeaderOptions.reason);
+
+            if (rankIdx === -1 || itemIdx === -1) {
+                throw new Error('순위와 물품 열을 찾을 수 없습니다. 헤더를 다시 확인해주세요.');
+            }
+
+            const ranking = Array(appData.items.length).fill(null);
+            const usedItems = new Set();
+            const warnings = [];
+
+            for (let rowIndex = 1; rowIndex < rows.length; rowIndex++) {
+                const row = rows[rowIndex] || [];
+                const rawRank = row[rankIdx];
+                const rawItem = row[itemIdx];
+                const rawReason = reasonIdx === -1 ? '' : row[reasonIdx];
+                const rowLabel = `${rowIndex + 1}행`;
+
+                const rankFilled = rawRank !== undefined && rawRank !== null && String(rawRank).trim() !== '';
+                const itemFilled = rawItem !== undefined && rawItem !== null && String(rawItem).trim() !== '';
+                const reasonFilled = rawReason !== undefined && rawReason !== null && String(rawReason).trim() !== '';
+
+                if (!rankFilled && !itemFilled && !reasonFilled) continue;
+
+                if (!rankFilled || !itemFilled) {
+                    warnings.push(`${rowLabel}: 순위와 물품을 모두 입력해야 합니다.`);
+                    continue;
+                }
+
+                const rankNumber = Number(rawRank);
+                if (!Number.isInteger(rankNumber) || rankNumber < 1 || rankNumber > appData.items.length) {
+                    warnings.push(`${rowLabel}: 순위 값이 올바르지 않습니다.`);
+                    continue;
+                }
+
+                const itemName = String(rawItem).trim();
+                const matchedItem = appData.items.find(item => item.name === itemName);
+                if (!matchedItem) {
+                    warnings.push(`${rowLabel}: "${itemName}"은(는) 물품 목록에 없습니다.`);
+                    continue;
+                }
+
+                const targetIndex = rankNumber - 1;
+                if (ranking[targetIndex]) {
+                    const existingItem = appData.items.find(item => item.id === ranking[targetIndex].id);
+                    warnings.push(`${rowLabel}: 순위 ${rankNumber}에는 이미 "${existingItem?.name || '다른 물품'}"이 있습니다.`);
+                    continue;
+                }
+
+                if (usedItems.has(matchedItem.id)) {
+                    warnings.push(`${rowLabel}: "${itemName}"은(는) 이미 다른 순위에 선택되었습니다.`);
+                    continue;
+                }
+
+                ranking[targetIndex] = { id: matchedItem.id, reason: String(rawReason ?? '').trim() };
+                usedItems.add(matchedItem.id);
+            }
+
+            return { ranking, warnings };
+        };
+
+        const applyGroupExcelImport = (ranking) => {
+            const nextState = Array(appData.items.length).fill(null);
+            ranking.forEach((value, index) => { nextState[index] = value ? { ...value } : null; });
+            appData.state.groupRankedItems = nextState;
+            renderRankingSlots('group');
+            autoSave();
+        };
+
+        const downloadGroupExcelTemplate = async () => {
+            const templatePath = new URL('모둠토의_바다에서살아남기_양식.xlsx', window.location.href).href;
+            const targetFileName = '모둠토의_바다에서살아남기_양식.xlsx';
+            const statusEl = dom.groupExcelStatus;
+            const setStatus = (text) => { if (statusEl) statusEl.textContent = text; };
+
+            const triggerDownload = (href) => {
+                const link = document.createElement('a');
+                link.href = href;
+                link.download = targetFileName;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            try {
+                setStatus('양식을 준비 중입니다...');
+                const response = await fetch(templatePath, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                triggerDownload(url);
+                URL.revokeObjectURL(url);
+                setStatus('엑셀 양식을 다운로드했습니다.');
+            } catch (error) {
+                console.error('Template download error:', error);
+                try {
+                    triggerDownload(templatePath);
+                    setStatus('엑셀 양식을 다운로드했습니다.');
+                } catch (fallbackError) {
+                    console.error('Template download fallback error:', fallbackError);
+                    setStatus('양식을 다운로드할 수 없습니다.');
+                    showAlert('양식 파일을 다운로드하는 중 문제가 발생했습니다. 다른 브라우저를 사용하거나 관리자에게 문의해주세요.', '다운로드 오류');
+                }
+            }
+        };
+
+        const handleGroupExcelUpload = (file) => {
+            if (!file) return;
+            if (dom.groupExcelStatus) dom.groupExcelStatus.textContent = '엑셀을 불러오는 중입니다...';
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    if (!firstSheet) throw new Error('첫 번째 시트를 찾을 수 없습니다.');
+
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, raw: true });
+                    const { ranking, warnings } = parseGroupExcelRows(rows);
+                    applyGroupExcelImport(ranking);
+
+                    const filledCount = ranking.filter(Boolean).length;
+                    const warningCount = warnings.length;
+                    if (dom.groupExcelStatus) {
+                        let statusText = `엑셀에서 ${filledCount}개의 순위를 불러왔습니다.`;
+                        if (warningCount) statusText += ` (건너뜀 ${warningCount}건)`;
+                        dom.groupExcelStatus.textContent = statusText;
+                    }
+
+                    if (warnings.length) {
+                        showAlert(warnings.join('\n'), '일부 항목 건너뜀');
+                    } else {
+                        showAlert('엑셀 데이터를 불러왔습니다.', '불러오기 완료');
+                    }
+                } catch (error) {
+                    console.error('Group Excel import error:', error);
+                    if (dom.groupExcelStatus) dom.groupExcelStatus.textContent = '엑셀을 불러오지 못했습니다. 양식을 확인하세요.';
+                    showAlert(error.message || '엑셀을 읽는 중 오류가 발생했습니다.', '불러오기 오류');
+                } finally {
+                    if (dom.groupExcelUploadInput) dom.groupExcelUploadInput.value = '';
+                }
+            };
+
+            reader.onerror = () => {
+                if (dom.groupExcelStatus) dom.groupExcelStatus.textContent = '파일을 읽는 중 오류가 발생했습니다.';
+                showAlert('파일을 읽는 중 문제가 발생했습니다.', '불러오기 오류');
+                if (dom.groupExcelUploadInput) dom.groupExcelUploadInput.value = '';
+            };
+
+            reader.readAsArrayBuffer(file);
+        };
+
         const exportToExcel = () => {
-            // This function remains largely the same, but let's ensure it uses the final data correctly.
-            // Minor improvements for robustness.
             const wb = XLSX.utils.book_new();
             const data = [
                 ["소속", appData.state.groupName],
@@ -1603,6 +1849,34 @@
             }
         };
 
+        const openIndividualRankViewModal = () => {
+            const rankedItems = appData.state.rankedItems;
+            const listEl = dom.individualRankViewBody;
+            const modeStr = appData.state.individualRankMode || '15';
+            const parsedMode = parseRankMode(modeStr);
+            const rankedIndices = new Set();
+            
+            if (parsedMode.type === 'top') {
+                for (let i = 0; i < parsedMode.top; i++) rankedIndices.add(i);
+            } else if (parsedMode.type === 'top-bottom') {
+                for (let i = 0; i < parsedMode.top; i++) rankedIndices.add(i);
+                for (let i = 15 - parsedMode.bottom; i < 15; i++) rankedIndices.add(i);
+            }
+
+            const validRankedItems = rankedItems
+                .map((itemData, index) => ({...itemData, index}))
+                .filter(itemData => itemData.id && rankedIndices.has(itemData.index));
+
+            if (validRankedItems.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-slate-400">아직 개인 순위를 정하지 않았습니다.</p>`;
+            } else {
+                listEl.innerHTML = validRankedItems.map(itemData => {
+                    const item = appData.items.find(i => i.id === itemData.id);
+                    return `<div class="p-2 bg-slate-800 rounded-md text-sm"><p class="font-bold">${itemData.index + 1}위. ${item.icon} ${item.name}</p><p class="text-sm text-slate-400 mt-1 pl-3 break-keep">이유: ${itemData.reason || '작성하지 않음'}</p></div>`;
+                }).join('');
+            }
+            openModal(dom.individualRankViewModal);
+        };
 
         const handleBodyClick = (event) => {
             const target = event.target;
@@ -1618,45 +1892,10 @@
 
             if (rankModeButton) {
                 const newModeStr = rankModeButton.dataset.mode;
-                const getValidIndices = (modeStr) => {
-                    const parsed = parseRankMode(modeStr);
-                    const indices = new Set();
-                    if (parsed.type === 'top') {
-                        for (let i = 0; i < parsed.top; i++) indices.add(i);
-                    } else if (parsed.type === 'top-bottom') {
-                        for (let i = 0; i < parsed.top; i++) indices.add(i);
-                        for (let i = 15 - parsed.bottom; i < 15; i++) indices.add(i);
-                    }
-                    return indices;
-                };
-
-                const newValidIndices = getValidIndices(newModeStr);
-                let itemsWillBeRemoved = false;
-                appData.state.rankedItems.forEach((item, index) => {
-                    if (item && !newValidIndices.has(index)) {
-                        itemsWillBeRemoved = true;
-                    }
-                });
-
-                const switchMode = () => {
-                    appData.state.individualRankMode = newModeStr;
-                    const newItems = Array(15).fill(null);
-                    newValidIndices.forEach(index => {
-                        if(appData.state.rankedItems[index]) {
-                           newItems[index] = appData.state.rankedItems[index];
-                        }
-                    });
-                    appData.state.rankedItems = newItems;
-                    closeModal(dom.rankModeModalEl);
-                    renderRankingSlots('individual');
-                    autoSave();
-                };
-
-                if (itemsWillBeRemoved) {
-                    showConfirm(`모드를 변경하면 일부 순위가 초기화됩니다. 계속하시겠습니까?`, switchMode, '모드 변경 확인', { okText: '변경', cancelText: '취소' });
-                } else {
-                    switchMode();
-                }
+                appData.state.individualRankMode = newModeStr;
+                closeModal(dom.rankModeModalEl);
+                renderRankingSlots('individual');
+                autoSave();
                 return;
             }
 
@@ -1671,12 +1910,35 @@
 
             const actions = {
                 'start-class-btn': () => {
-                    if (localStorage.getItem(SAVE_KEY)) {
-                        showConfirm('저장된 진행 상황을 이어서 하시겠습니까?', () => { if (!restoreSession()) { showAlert("데이터를 불러오지 못했습니다. 새로 시작합니다.", "오류"); restartApp(); } }, '진행 상황 발견', { onCancel: () => { appData.state = getNewState(); showScreen('setup-screen'); }, okText: '이어하기', cancelText: '새로 시작', okClass: 'bg-green-600 hover:bg-green-700', cancelClass: 'bg-red-600 hover:bg-red-700' });
-                    } else {
-                        appData.state = getNewState();
-                        showScreen('setup-screen');
+                    const savedState = getSavedStateFromStorage();
+                    if (savedState) {
+                        showConfirm(
+                            '저장된 진행 상황을 이어서 하시겠습니까?', 
+                            () => { if (!restoreSession(savedState)) { showAlert("데이터를 불러오지 못했습니다. 새로 시작합니다.", "오류"); restartApp(); } }, 
+                            '진행 상황 발견', 
+                            { 
+                                onCancel: () => {
+                                    showConfirm(
+                                        '정말 이전 데이터를 모두 지우고 새로 시작하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+                                        () => {
+                                            localStorage.removeItem(SAVE_KEY);
+                                            appData.state = getNewState();
+                                            showScreen('setup-screen');
+                                        },
+                                        '새로 시작 확인',
+                                        { okText: '삭제하고 시작', cancelText: '취소', okClass: 'bg-red-600 hover:bg-red-700' }
+                                    );
+                                }, 
+                                okText: '이어하기', 
+                                cancelText: '새로 시작', 
+                                okClass: 'bg-green-600 hover:bg-green-700', 
+                                cancelClass: 'bg-yellow-600 hover:bg-yellow-700'
+                            }
+                        );
+                        return;
                     }
+                    appData.state = getNewState();
+                    showScreen('setup-screen');
                 },
                 'start-mission-btn': startMission,
                 'skip-emergency-btn': () => { stopMusicAndClear(); skipEmergencySequence(); },
@@ -1689,9 +1951,9 @@
                 'open-knowledge-modal-btn': openKnowledgeModal,
                 'open-knowledge-modal-btn-group': openKnowledgeModal,
                 'open-rank-mode-modal-btn': () => openModal(dom.rankModeModalEl),
-                'back-to-start-btn': () => showConfirm('진행 상황이 모두 사라집니다. 정말 처음으로 돌아가시겠습니까?', restartApp, '처음으로 돌아가기', { okText: '확인', cancelText: '취소' }),
+                'back-to-start-btn': () => showConfirm('진행 상황이 모두 사라집니다. 정말 처음으로 돌아가시겠습니까?', restartApp, '처음으로 돌아가기'),
                 'exit-app-btn': () => showConfirm('정말 종료하시겠습니까? 진행 상황은 저장됩니다.', () => window.close(), '종료', { okText: '종료', cancelText: '취소' }),
-                'restart-btn': () => showConfirm('정말 모든 진행 상황을 삭제하고 다시 시작하시겠습니까?', restartApp, '다시 시작하기', { okText: '다시 시작', cancelText: '취소' }),
+                'restart-btn': () => showConfirm('정말 모든 진행 상황을 삭제하고 다시 시작하시겠습니까?', restartApp, '다시 시작하기', { okText: '다시 시작' }),
                 'open-save-share-modal-btn': () => openModal(dom.saveShareModalEl),
                 'save-image-btn': () => { closeModal(dom.saveShareModalEl); downloadReport(); },
                 'save-excel-btn': () => { closeModal(dom.saveShareModalEl); exportToExcel(); },
@@ -1699,6 +1961,13 @@
                 'go-to-evaluation-btn': showEvaluationScreen,
                 'back-to-report-btn': () => showScreen('report-screen'),
                 'save-evaluation-btn': downloadEvaluationAsImage,
+                'view-individual-rank-btn': openIndividualRankViewModal,
+                'group-excel-upload-btn': () => dom.groupExcelUploadInput?.click(),
+                'group-excel-template-btn': downloadGroupExcelTemplate,
+                'back-to-individual-ranking-btn': () => {
+                    renderRankingSlots('individual');
+                    showScreen('main-screen');
+                },
                 'add-peer-btn': () => {
                     if (appData.state.peerEvaluations.length >= 5) {
                         showAlert('모둠원은 최대 5명까지 추가할 수 있습니다.');
@@ -1707,19 +1976,15 @@
                     appData.state.peerEvaluations.push({ id: Date.now(), name: '', role: '', q1: null, q2: null, q3: null, goodPoint: '' });
                     renderEvaluationScreen();
                 },
+                'reselect-role-btn': () => {
+                    closeModal(document.getElementById('role-understanding-modal'));
+                    appData.state.selectedRole = null;
+                    autoSave();
+                    showScreen('role-screen');
+                },
                 'check-understanding-btn': () => {
-                    const modal = document.getElementById('role-understanding-modal');
-                    if (!modal) return;
-                    const checkboxes = modal.querySelectorAll('.understanding-check');
-                    const correctlyChecked = Array.from(checkboxes).filter(cb => {
-                        const isCorrect = cb.dataset.correct === 'true';
-                        return (isCorrect && cb.checked) || (!isCorrect && !cb.checked);
-                    }).length;
-
-                    if (correctlyChecked === 4) {
-                        closeModal(modal);
-                        proceedToKnowledgeScreen();
-                    }
+                    closeModal(document.getElementById('role-understanding-modal'));
+                    proceedToKnowledgeScreen();
                 },
             };
 
@@ -1772,11 +2037,30 @@
             document.addEventListener('fullscreenchange', updateFullscreenIcons);
             document.body.addEventListener('click', handleBodyClick);
             
-            ['groupNameInput', 'studentNameInput', 'studentNumberInput'].forEach(id => {
-                dom[id].addEventListener('input', () => { appData.state[id.replace('Input','')] = dom[id].value; });
-            });
-            dom.rankListEl.addEventListener('input', (e) => { if(e.target.matches('textarea')) autoSave(); });
-            dom.groupRankListEl.addEventListener('input', (e) => { if(e.target.matches('textarea')) autoSave(); });
+            // Setup robust reason saving
+            const updateReasonInState = (type, itemId, reason) => {
+                const rankedItems = type === 'individual' ? appData.state.rankedItems : appData.state.groupRankedItems;
+                const itemIndex = rankedItems.findIndex(item => item && item.id === itemId);
+                if (itemIndex !== -1) {
+                    rankedItems[itemIndex].reason = reason;
+                }
+            };
+            
+            const setupReasonSaving = (listEl, type) => {
+                listEl.addEventListener('input', (e) => {
+                    if (e.target.matches('textarea')) {
+                        const reasonAttribute = type === 'individual' ? 'data-reason-for-item' : 'data-reason-for-group-item';
+                        const itemId = parseInt(e.target.getAttribute(reasonAttribute), 10);
+                        if (itemId) {
+                            updateReasonInState(type, itemId, e.target.value);
+                            autoSave(); // Save on every keystroke in a reason textarea
+                        }
+                    }
+                });
+            };
+            setupReasonSaving(dom.rankListEl, 'individual');
+            setupReasonSaving(dom.groupRankListEl, 'group');
+            dom.groupExcelUploadInput?.addEventListener('change', (e) => handleGroupExcelUpload(e.target.files[0]));
             dom.evaluationFormContainer.addEventListener('input', (e) => { if(e.target.closest('.peer-input, fieldset, textarea')) autoSave(); });
             
             new Sortable(dom.rankListEl, { animation: 150, handle: '.drag-handle', onEnd: (evt) => {
